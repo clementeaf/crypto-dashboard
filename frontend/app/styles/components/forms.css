@@ -1,0 +1,50 @@
+/* Estilos para formularios usando clases de utilidad de Tailwind */
+
+@layer components {
+  .form-group {
+    @apply mb-4;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1;
+  }
+
+  .form-input {
+    @apply block w-full px-3 py-2 border border-gray-300 dark:border-gray-700
+           rounded-md shadow-sm bg-white dark:bg-gray-800
+           text-gray-700 dark:text-gray-200
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+           disabled:opacity-50 disabled:cursor-not-allowed
+           placeholder:text-gray-400 dark:placeholder:text-gray-500;
+  }
+
+  .form-select {
+    @apply form-input pr-10 appearance-none bg-no-repeat bg-right;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-size: 1.5em 1.5em;
+  }
+
+  .form-checkbox {
+    @apply h-4 w-4 rounded border-gray-300 text-primary-600 
+           focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800;
+  }
+
+  .form-radio {
+    @apply h-4 w-4 border-gray-300 text-primary-600 
+           focus:ring-primary-500 dark:border-gray-700 dark:bg-gray-800;
+  }
+
+  /* Específico para el filtro de criptomonedas */
+  .crypto-filter {
+    @apply relative w-full;
+  }
+
+  .crypto-filter-input {
+    @apply form-input pl-10;
+  }
+
+  .crypto-filter-icon {
+    @apply absolute left-3 top-1/2 -translate-y-1/2 
+           text-gray-400 dark:text-gray-500 pointer-events-none;
+  }
+} 

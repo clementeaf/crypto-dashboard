@@ -1,0 +1,57 @@
+/* Estilos principales para la aplicación Crypto Dashboard */
+
+/* Importación de Tailwind base */
+@import 'tailwindcss/base';
+
+/* Importación de componentes de Tailwind */
+@import 'tailwindcss/components';
+
+/* Importación de nuestros componentes personalizados */
+@import './components/buttons.css';
+@import './components/cards.css';
+@import './components/forms.css';
+
+/* Importación de utilidades de Tailwind */
+@import 'tailwindcss/utilities';
+
+/* Estilos globales adicionales */
+@layer base {
+  html,
+  body {
+    @apply bg-light-background text-light-text dark:bg-dark-background dark:text-dark-text;
+    @apply transition-colors duration-200;
+    @apply min-h-screen;
+  }
+
+  h1 {
+    @apply text-3xl font-bold text-gray-900 dark:text-white;
+  }
+
+  h2 {
+    @apply text-2xl font-bold text-gray-800 dark:text-gray-100;
+  }
+
+  h3 {
+    @apply text-xl font-semibold text-gray-800 dark:text-gray-100;
+  }
+
+  h4 {
+    @apply text-lg font-semibold text-gray-700 dark:text-gray-200;
+  }
+
+  a {
+    @apply text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300;
+  }
+
+  /* Asegurar que todas las transitions sean suaves para el modo oscuro/claro */
+  * {
+    @apply transition-colors duration-200;
+  }
+}
+
+/* Media queries para preferencias de color del sistema */
+@media (prefers-color-scheme: dark) {
+  html.dark-auto {
+    color-scheme: dark;
+  }
+} 
