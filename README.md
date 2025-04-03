@@ -19,6 +19,7 @@ Aplicación web que muestra un dashboard de criptomonedas con datos en tiempo re
 - [Remix](https://remix.run)
 - React
 - API de Coinbase
+- Tailwind CSS
 
 ## Instalación
 
@@ -37,4 +38,10 @@ npm install
 3. Inicia el servidor de desarrollo
 ```bash
 npm run dev
-``` 
+```
+
+## Documentación
+
+Para más información, consulta:
+- [CHANGELOG.md](frontend/CHANGELOG.md) - Historial de cambios
+- [ROADMAP.md](frontend/ROADMAP.md) - Plan de desarrollo 
