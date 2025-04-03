@@ -7,6 +7,11 @@ import {
   buildApiUrl, 
   handleApiResponse,
 } from './api.config';
+import { 
+  getDummyCryptocurrencies,
+  getDummyCryptocurrencyById,
+  filterDummyCryptocurrencies
+} from '~/data/dummyData';
 import type { 
   Cryptocurrency, 
   CryptocurrenciesResponse,
@@ -17,47 +22,71 @@ import type {
  * Obtiene las tasas de cambio para una moneda base específica
  */
 export async function getExchangeRates(currency: string = 'USD'): Promise<ExchangeRates> {
-  const url = buildApiUrl(API_ROUTES.exchangeRates, { currency });
+  // En un entorno real, haríamos una llamada a la API:
+  // const url = buildApiUrl(API_ROUTES.exchangeRates, { currency });
+  // const response = await fetch(url, { ...defaultFetchOptions, method: 'GET' });
+  // const data = await handleApiResponse<{ data: ExchangeRates }>(response);
+  // return data.data;
   
-  const response = await fetch(url, {
-    ...defaultFetchOptions,
-    method: 'GET',
-  });
+  // Mientras tanto, simulamos una respuesta con datos de prueba
+  // Simulamos un delay para simular la latencia de red
+  await new Promise(resolve => setTimeout(resolve, 300));
   
-  const data = await handleApiResponse<{ data: ExchangeRates }>(response);
-  return data.data;
+  return {
+    base: currency,
+    rates: {
+      USD: 1,
+      BTC: 0.000015,
+      ETH: 0.00029,
+      SOL: 0.0065,
+      ADA: 1.84,
+      DOT: 0.127,
+      XRP: 1.72,
+      DOGE: 8.13,
+      AVAX: 0.029,
+      LINK: 0.073,
+      UNI: 0.112,
+      LTC: 0.0128,
+      ATOM: 0.138,
+      SHIB: 42735.04,
+      TRX: 8.26,
+      BNB: 0.00176,
+    }
+  };
 }
 
 /**
  * Obtiene una lista de criptomonedas con sus detalles
- * 
- * NOTA: Esta función usa datos de prueba temporales hasta que tengamos acceso
- * a la API real. Más adelante, será reemplazada por llamadas reales.
  */
-export async function getCryptocurrencies(): Promise<Cryptocurrency[]> {
-  // En un entorno real, haríamos una llamada a la API aquí:
-  // const url = buildApiUrl(API_ROUTES.prices, { order: 'market_cap_desc' });
+export async function getCryptocurrencies(limit?: number): Promise<Cryptocurrency[]> {
+  // En un entorno real, haríamos una llamada a la API:
+  // const url = buildApiUrl(API_ROUTES.prices, { order: 'market_cap_desc', limit: limit?.toString() });
   // const response = await fetch(url, { ...defaultFetchOptions, method: 'GET' });
   // const data = await handleApiResponse<CryptocurrenciesResponse>(response);
   // return data.data;
   
-  // Mientras tanto, devolvemos datos de prueba
-  return getMockCryptocurrencies();
+  // Simulamos un delay para simular la latencia de red
+  await new Promise(resolve => setTimeout(resolve, 500));
+  
+  // Utilizamos los datos dummy
+  return getDummyCryptocurrencies(limit);
 }
 
 /**
  * Obtiene los datos detallados de una criptomoneda específica
  */
 export async function getCryptocurrencyById(id: string): Promise<Cryptocurrency> {
-  // En un entorno real, haríamos una llamada a la API aquí:
+  // En un entorno real, haríamos una llamada a la API:
   // const url = buildApiUrl(`${API_ROUTES.prices}/${id}`);
   // const response = await fetch(url, { ...defaultFetchOptions, method: 'GET' });
   // const data = await handleApiResponse<{ data: Cryptocurrency }>(response);
   // return data.data;
   
-  // Mientras tanto, devolvemos datos de prueba
-  const allCryptos = await getMockCryptocurrencies();
-  const crypto = allCryptos.find(c => c.id === id);
+  // Simulamos un delay para simular la latencia de red
+  await new Promise(resolve => setTimeout(resolve, 300));
+  
+  // Utilizamos los datos dummy
+  const crypto = getDummyCryptocurrencyById(id);
   
   if (!crypto) {
     throw new Error(`Criptomoneda con ID ${id} no encontrada`);
@@ -67,150 +96,18 @@ export async function getCryptocurrencyById(id: string): Promise<Cryptocurrency>
 }
 
 /**
- * Datos de prueba para criptomonedas
- * Esta función será eliminada cuando tengamos la API real
+ * Filtra criptomonedas por nombre o símbolo
  */
-function getMockCryptocurrencies(): Cryptocurrency[] {
-  return [
-    {
-      id: 'bitcoin',
-      symbol: 'btc',
-      name: 'Bitcoin',
-      image: 'https://assets.coingecko.com/coins/images/1/large/bitcoin.png',
-      current_price: {
-        usd: 65432.10,
-        btc: 1,
-      },
-      price_change_percentage_24h: 2.5,
-      market_cap: 1258000000000,
-      total_volume: 25000000000,
-      circulating_supply: 19000000,
-    },
-    {
-      id: 'ethereum',
-      symbol: 'eth',
-      name: 'Ethereum',
-      image: 'https://assets.coingecko.com/coins/images/279/large/ethereum.png',
-      current_price: {
-        usd: 3456.78,
-        btc: 0.05321,
-      },
-      price_change_percentage_24h: 1.2,
-      market_cap: 416000000000,
-      total_volume: 15000000000,
-      circulating_supply: 120000000,
-    },
-    {
-      id: 'solana',
-      symbol: 'sol',
-      name: 'Solana',
-      image: 'https://assets.coingecko.com/coins/images/4128/large/solana.png',
-      current_price: {
-        usd: 154.32,
-        btc: 0.00238,
-      },
-      price_change_percentage_24h: 3.7,
-      market_cap: 67000000000,
-      total_volume: 2800000000,
-      circulating_supply: 435000000,
-    },
-    {
-      id: 'cardano',
-      symbol: 'ada',
-      name: 'Cardano',
-      image: 'https://assets.coingecko.com/coins/images/975/large/cardano.png',
-      current_price: {
-        usd: 0.543,
-        btc: 0.0000083,
-      },
-      price_change_percentage_24h: -0.8,
-      market_cap: 19200000000,
-      total_volume: 410000000,
-      circulating_supply: 35400000000,
-    },
-    {
-      id: 'polkadot',
-      symbol: 'dot',
-      name: 'Polkadot',
-      image: 'https://assets.coingecko.com/coins/images/12171/large/polkadot.png',
-      current_price: {
-        usd: 7.89,
-        btc: 0.000122,
-      },
-      price_change_percentage_24h: -1.2,
-      market_cap: 9800000000,
-      total_volume: 290000000,
-      circulating_supply: 1240000000,
-    },
-    {
-      id: 'ripple',
-      symbol: 'xrp',
-      name: 'XRP',
-      image: 'https://assets.coingecko.com/coins/images/44/large/xrp-symbol-white-128.png',
-      current_price: {
-        usd: 0.58,
-        btc: 0.0000089,
-      },
-      price_change_percentage_24h: 0.7,
-      market_cap: 31500000000,
-      total_volume: 980000000,
-      circulating_supply: 54300000000,
-    },
-    {
-      id: 'binancecoin',
-      symbol: 'bnb',
-      name: 'Binance Coin',
-      image: 'https://assets.coingecko.com/coins/images/825/large/bnb-icon2_2x.png',
-      current_price: {
-        usd: 567.89,
-        btc: 0.00876,
-      },
-      price_change_percentage_24h: 0.3,
-      market_cap: 87600000000,
-      total_volume: 1560000000,
-      circulating_supply: 154500000,
-    },
-    {
-      id: 'avalanche',
-      symbol: 'avax',
-      name: 'Avalanche',
-      image: 'https://assets.coingecko.com/coins/images/12559/large/Avalanche_Circle_RedWhite_Trans.png',
-      current_price: {
-        usd: 34.56,
-        btc: 0.000533,
-      },
-      price_change_percentage_24h: 5.2,
-      market_cap: 12400000000,
-      total_volume: 670000000,
-      circulating_supply: 359000000,
-    },
-    {
-      id: 'dogecoin',
-      symbol: 'doge',
-      name: 'Dogecoin',
-      image: 'https://assets.coingecko.com/coins/images/5/large/dogecoin.png',
-      current_price: {
-        usd: 0.123,
-        btc: 0.00000189,
-      },
-      price_change_percentage_24h: -2.1,
-      market_cap: 17500000000,
-      total_volume: 890000000,
-      circulating_supply: 142000000000,
-    },
-    {
-      id: 'shiba-inu',
-      symbol: 'shib',
-      name: 'Shiba Inu',
-      image: 'https://assets.coingecko.com/coins/images/11939/large/shiba.png',
-      current_price: {
-        usd: 0.0000234,
-        btc: 3.61e-10,
-      },
-      price_change_percentage_24h: 1.9,
-      market_cap: 13800000000,
-      total_volume: 430000000,
-      circulating_supply: 589000000000000,
-    },
-  ];
+export async function searchCryptocurrencies(query: string): Promise<Cryptocurrency[]> {
+  // En un entorno real, haríamos una llamada a la API:
+  // const url = buildApiUrl(API_ROUTES.search, { query });
+  // const response = await fetch(url, { ...defaultFetchOptions, method: 'GET' });
+  // const data = await handleApiResponse<CryptocurrenciesResponse>(response);
+  // return data.data;
+  
+  // Simulamos un delay para simular la latencia de red
+  await new Promise(resolve => setTimeout(resolve, 200));
+  
+  // Utilizamos los datos dummy
+  return filterDummyCryptocurrencies(query);
 } 
