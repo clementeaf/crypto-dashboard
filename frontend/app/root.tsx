@@ -9,6 +9,8 @@ import {
 import { json } from "@remix-run/node";
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { useState, useEffect, createContext, useContext } from "react";
+import { Amplify } from 'aws-amplify';
+import { loadAmplifyConfig } from './utils/amplify-config';
 
 // Importamos el archivo tailwind.css directamente
 import "./tailwind.css";
@@ -31,7 +33,7 @@ export function useTheme() {
 }
 
 // Obtenemos la preferencia de tema del usuario
-export async function loader({ request }: LoaderFunctionArgs) {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const cookieHeader = request.headers.get("Cookie") || "";
   const cookieTheme = cookieHeader
     .split(";")
@@ -39,8 +41,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
     
   const theme = cookieTheme ? cookieTheme.split("=")[1] : "light";
   
-  return json({ theme });
-}
+  // Load Amplify configuration for the client side
+  const amplifyConfig = loadAmplifyConfig();
+  
+  return json({ 
+    theme,
+    amplifyConfig
+  });
+};
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -64,6 +72,11 @@ export default function App() {
   const data = useLoaderData<typeof loader>();
   const initialTheme = ((data?.theme === 'light' || data?.theme === 'dark') ? data.theme : 'light') as Theme;
   const [theme, setTheme] = useState<Theme>(initialTheme);
+  
+  // Initialize Amplify on the client side
+  if (typeof window !== 'undefined' && data.amplifyConfig) {
+    Amplify.configure(data.amplifyConfig);
+  }
 
   // Efecto para aplicar el tema seleccionado
   useEffect(() => {
