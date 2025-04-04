@@ -7,8 +7,6 @@ import {
 import { json } from "@remix-run/node";
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { useState, useEffect, createContext, useContext } from "react";
-import { Amplify } from 'aws-amplify';
-import { loadAmplifyConfig } from './utils/amplify-config';
 
 // Importamos el archivo tailwind.css directamente
 import "./tailwind.css";
@@ -39,12 +37,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
     
   const theme = cookieTheme ? cookieTheme.split("=")[1] : "light";
   
-  // Load Amplify configuration for the client side
-  const amplifyConfig = loadAmplifyConfig();
-  
   return json({ 
-    theme,
-    amplifyConfig
+    theme
   });
 };
 
@@ -70,32 +64,6 @@ export default function App() {
   const data = useLoaderData<typeof loader>();
   const initialTheme = ((data?.theme === 'light' || data?.theme === 'dark') ? data.theme : 'light') as Theme;
   const [theme, setTheme] = useState<Theme>(initialTheme);
-  
-  // Aplicamos protección contra redeclaración de RefreshRuntime
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    // Configuración global para AWS Amplify
-    if (!(window as any).global) (window as any).global = window;
-    if (!(window as any).process) {
-      (window as any).process = { 
-        env: { NODE_ENV: 'production' },
-        nextTick: (callback: Function) => setTimeout(callback, 0)
-      };
-    }
-    if (!(window as any).Buffer) {
-      (window as any).Buffer = {
-        isBuffer: (obj: any) => false,
-        from: () => ({}),
-        alloc: () => ({})
-      };
-    }
-
-    // Inicializar Amplify
-    if (data.amplifyConfig) {
-      Amplify.configure(data.amplifyConfig);
-    }
-  }, [data.amplifyConfig]);
 
   // Efecto para aplicar el tema seleccionado
   useEffect(() => {
