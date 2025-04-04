@@ -42,39 +42,61 @@ export const links: LinksFunction = () => [
   },
 ];
 
+// Función para detectar si el sistema está en modo oscuro
+function getSystemTheme(): 'light' | 'dark' {
+  if (typeof window === 'undefined') return 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
 export function Layout({ children }: { children: React.ReactNode }) {
   const { theme } = useLoaderData<typeof loader>();
   const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'system'>(
     theme as 'light' | 'dark' | 'system'
   );
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
 
   // Efecto para aplicar el tema seleccionado
   useEffect(() => {
     const root = window.document.documentElement;
     root.classList.remove('light', 'dark', 'dark-auto');
 
+    let effectiveTheme: 'light' | 'dark';
     if (themeMode === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-      root.classList.add(systemTheme === 'dark' ? 'dark-auto' : 'light');
+      effectiveTheme = getSystemTheme();
+      root.classList.add('dark-auto');
     } else {
+      effectiveTheme = themeMode;
       root.classList.add(themeMode);
     }
+    
+    setResolvedTheme(effectiveTheme);
 
     // Guardar preferencia en cookie
     document.cookie = `theme=${themeMode};path=/;max-age=31536000`;
+    
+    // Escuchar cambios en el tema del sistema
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e: MediaQueryListEvent) => {
+      if (themeMode === 'system') {
+        setResolvedTheme(e.matches ? 'dark' : 'light');
+      }
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
   }, [themeMode]);
 
   return (
-    <html lang="es" className={themeMode === 'system' ? '' : themeMode}>
+    <html lang="es" className={resolvedTheme}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
       </head>
-      <body>
+      <body className="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
         {children}
         <ScrollRestoration />
         <Scripts />
