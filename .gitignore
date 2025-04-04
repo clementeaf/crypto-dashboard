@@ -34,4 +34,9 @@ Thumbs.db
 
 # Remix
 **/build
-**/public/build /frontend/coverage/
+**/public/build
+/frontend/coverage/
+**/coverage/
+
+# Tests
+**/.nyc_output
