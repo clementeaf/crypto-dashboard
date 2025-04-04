@@ -1,8 +1,10 @@
 import { json } from "@remix-run/node";
-import { useLoaderData, useNavigation } from "@remix-run/react";
+import { useLoaderData, useRevalidator } from "@remix-run/react";
+import { useCallback } from "react";
 import type { MetaFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { getCryptocurrencies } from "~/services/crypto.service";
 import { setLastRefreshTime } from "~/utils/storage";
+import Dashboard from "~/components/layout/Dashboard";
 import type { Cryptocurrency } from "~/types/crypto";
 
 export const meta: MetaFunction = () => {
@@ -41,34 +43,19 @@ export default function Index() {
   // Obtener datos del loader
   const { cryptocurrencies, error } = useLoaderData<typeof loader>();
   
-  // Obtener estado de navegación para mostrar indicadores de carga
-  const navigation = useNavigation();
-  const isLoading = navigation.state === "loading";
+  // Obtener el revalidator para actualizar los datos
+  const revalidator = useRevalidator();
+  
+  // Callback para actualizar los datos
+  const handleRefresh = useCallback(() => {
+    revalidator.revalidate();
+  }, [revalidator]);
   
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Crypto Dashboard</h1>
-      
-      {isLoading ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 dark:text-gray-400">Cargando datos de criptomonedas...</p>
-        </div>
-      ) : error ? (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
-          <p className="text-red-600 dark:text-red-400">{error}</p>
-        </div>
-      ) : (
-        <div>
-          <p className="mb-6">
-            {cryptocurrencies.length} criptomonedas encontradas
-          </p>
-          
-          {/* Aquí irán los componentes para mostrar las criptomonedas */}
-          <pre className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg overflow-auto max-h-96">
-            {JSON.stringify(cryptocurrencies, null, 2)}
-          </pre>
-        </div>
-      )}
-    </div>
+    <Dashboard 
+      cryptocurrencies={cryptocurrencies as unknown as Cryptocurrency[]}
+      onRefresh={handleRefresh}
+      error={error}
+    />
   );
 }
