@@ -34,4 +34,4 @@ Thumbs.db
 
 # Remix
 **/build
-**/public/build 
+**/public/build /frontend/coverage/
