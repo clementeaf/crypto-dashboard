@@ -66,7 +66,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial folder structure
 - README updated with project information
 
-### To Implement
+### Pending
 - Coinbase API integration
 - Cryptocurrency card components
 - Drag and drop functionality
