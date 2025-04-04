@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigation } from '@remix-run/react';
+import { useNavigate, useNavigation } from '@remix-run/react';
 import CryptoCard from '~/components/cards/CryptoCard';
 import SearchFilter from '~/components/ui/SearchFilter';
 import ThemeToggle from '~/components/ui/ThemeToggle';
 import type { Cryptocurrency } from '~/types/crypto';
 import { getTimeSinceLastRefresh, setLastRefreshTime } from '~/utils/storage';
+import { removeAuthCookie } from '~/utils/auth';
 
 interface DashboardProps {
   cryptocurrencies: Cryptocurrency[];
@@ -14,6 +15,7 @@ interface DashboardProps {
 
 export default function Dashboard({ cryptocurrencies, onRefresh, error }: DashboardProps) {
   const navigation = useNavigation();
+  const navigate = useNavigate();
   const isLoading = navigation.state === 'loading';
   const [timeSinceRefresh, setTimeSinceRefresh] = useState<number | null>(null);
   const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(false);
@@ -85,6 +87,14 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
     onRefresh();
     setLastRefreshTime();
   }, [onRefresh]);
+
+  // Handle logout
+  const handleLogout = () => {
+    // Eliminar la cookie de autenticación
+    document.cookie = "isAuthenticated=false; Path=/; Max-Age=0; SameSite=Lax";
+    // Redirigir al login
+    navigate("/login");
+  };
   
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
@@ -137,6 +147,24 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
             </div>
             <span className="text-sm">Auto</span>
           </label>
+
+          <button
+            className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors ml-2"
+            onClick={handleLogout}
+          >
+            <div className="flex items-center gap-1.5">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              Salir
+            </div>
+          </button>
         </div>
       </header>
       
