@@ -13,6 +13,11 @@ const STORAGE_KEYS = {
   LAST_REFRESH: `${STORAGE_PREFIX}last_refresh`,
 };
 
+// Clave para almacenar la preferencia de tema
+const THEME_KEY = 'crypto-dashboard-theme';
+
+type Theme = 'light' | 'dark' | 'system';
+
 /**
  * Guarda el orden de las tarjetas en localStorage
  */
@@ -90,31 +95,38 @@ export function getTimeSinceLastRefresh(): number | null {
 }
 
 /**
- * Guarda el tema elegido por el usuario
+ * Guarda la preferencia de tema en localStorage
  */
-export function saveThemePreference(theme: 'light' | 'dark' | 'system'): void {
-  if (!isLocalStorageAvailable()) return;
-  
+export function saveThemePreference(theme: Theme): void {
+  if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(STORAGE_KEYS.THEME, theme);
+    localStorage.setItem(THEME_KEY, theme);
   } catch (error) {
-    console.error('Error al guardar la preferencia de tema:', error);
+    console.error('Error al guardar preferencia de tema:', error);
   }
 }
 
 /**
- * Recupera el tema elegido por el usuario
+ * Recupera la preferencia de tema desde localStorage
+ * Si no existe, devuelve 'system'
  */
-export function getThemePreference(): 'light' | 'dark' | 'system' {
-  if (!isLocalStorageAvailable()) return 'system';
-  
+export function getThemePreference(): Theme {
+  if (typeof window === 'undefined') return 'system';
   try {
-    const theme = localStorage.getItem(STORAGE_KEYS.THEME) as 'light' | 'dark' | 'system' | null;
+    const theme = localStorage.getItem(THEME_KEY) as Theme;
     return theme || 'system';
   } catch (error) {
-    console.error('Error al recuperar la preferencia de tema:', error);
+    console.error('Error al recuperar preferencia de tema:', error);
     return 'system';
   }
+}
+
+/**
+ * Función para detectar si el sistema está configurado en modo oscuro
+ */
+export function isSystemDarkMode(): boolean {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
 
 /**
