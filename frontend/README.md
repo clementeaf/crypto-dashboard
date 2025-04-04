@@ -4,6 +4,7 @@ Este proyecto es una aplicación web que muestra un dashboard de criptomonedas c
 
 ## Características
 
+- Sistema de autenticación básico con rutas protegidas
 - Visualización de al menos 10 criptomonedas en un diseño de tarjetas responsivo
 - Datos de tasas de cambio en tiempo real desde la API de Coinbase
 - Reordenamiento de tarjetas mediante arrastrar y soltar
@@ -22,6 +23,22 @@ Para iniciar el servidor de desarrollo:
 ```shellscript
 npm run dev
 ```
+
+## Rutas de la aplicación
+
+La aplicación cuenta con las siguientes rutas:
+
+- `/login`: Página de inicio de sesión (credenciales: admin/admin)
+- `/dashboard`: Dashboard principal con datos de criptomonedas (protegido por autenticación)
+
+## Autenticación
+
+El sistema implementa una autenticación básica utilizando cookies:
+
+- Usuario por defecto: `admin`
+- Contraseña por defecto: `admin`
+- No requiere backend (autenticación simulada en el cliente)
+- Las rutas protegidas redireccionan automáticamente al login si no hay sesión activa
 
 ## Despliegue
 
@@ -43,7 +60,7 @@ La aplicación sigue la estructura estándar de Remix con las siguientes adicion
 
 - `/app/components`: Componentes reutilizables
 - `/app/routes`: Rutas de la aplicación
-- `/app/utils`: Utilidades y funciones auxiliares
+- `/app/utils`: Utilidades y funciones auxiliares (incluye utilidades de autenticación)
 - `/app/styles`: Estilos CSS (Tailwind CSS)
 
 ## Testing

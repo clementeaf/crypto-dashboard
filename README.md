@@ -4,7 +4,7 @@ A modern cryptocurrency dashboard that displays real-time data with a sleek Grok
 
 ## Overview
 
-This project showcases a responsive dashboard for monitoring cryptocurrency prices, market caps, and trends. The intuitive interface allows users to track major cryptocurrencies, filter results, and customize their viewing experience.
+This project showcases a responsive dashboard for monitoring cryptocurrency prices, market caps, and trends. The intuitive interface allows users to track major cryptocurrencies, filter results, and customize their viewing experience. The application includes a basic authentication system to protect the dashboard.
 
 ## Project Structure
 
@@ -13,6 +13,7 @@ This project showcases a responsive dashboard for monitoring cryptocurrency pric
 
 ## Features
 
+- Basic authentication system with login page and protected routes
 - Real-time cryptocurrency data display with elegant card design
 - Responsive layout optimized for all device sizes
 - Dark/light theme toggle with smooth transitions
@@ -38,6 +39,14 @@ The UI features a Grok3-inspired design system with:
 - Consistent spacing and typography
 - Responsive design principles
 
+## Authentication
+
+The system implements a basic cookie-based authentication:
+- Login page with username/password form
+- Default credentials: username `admin`, password `admin`
+- Protected routes redirect to login when not authenticated
+- Logout functionality integrated in the dashboard
+
 ## Installation
 
 1. Clone this repository
@@ -59,11 +68,13 @@ npm run dev
 
 ## Usage
 
+- Log in using the default credentials: username `admin`, password `admin`
 - Use the search box to filter cryptocurrencies
 - Toggle between light/dark theme with the intuitive theme switcher
 - Click "Refresh" to update data manually or enable "Auto" for automatic updates
 - Drag and drop cards to reorder them according to your preference
 - View detailed price information, market cap, and 24h volume for each cryptocurrency
+- Log out using the "Salir" button in the dashboard header
 
 ## Documentation
 
