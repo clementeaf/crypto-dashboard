@@ -15,7 +15,7 @@ This project showcases a responsive dashboard for monitoring cryptocurrency pric
 
 - Real-time cryptocurrency data display with elegant card design
 - Responsive layout optimized for all device sizes
-- Dark/light/system theme support with smooth transitions
+- Dark/light theme toggle with smooth transitions
 - Drag-and-drop reordering of cryptocurrency cards
 - Search filtering by name or symbol
 - Auto-refresh capability with manual refresh option
@@ -60,7 +60,7 @@ npm run dev
 ## Usage
 
 - Use the search box to filter cryptocurrencies
-- Toggle between light/dark/system theme with the theme switcher
+- Toggle between light/dark theme with the intuitive theme switcher
 - Click "Refresh" to update data manually or enable "Auto" for automatic updates
 - Drag and drop cards to reorder them according to your preference
 - View detailed price information, market cap, and 24h volume for each cryptocurrency
