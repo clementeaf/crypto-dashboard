@@ -2,8 +2,6 @@ import {
   Links,
   Meta,
   Outlet,
-  Scripts,
-  ScrollRestoration,
   useLoaderData,
 } from "@remix-run/react";
 import { json } from "@remix-run/node";
@@ -64,11 +62,7 @@ export const links: LinksFunction = () => [
   {
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap",
-  },
-  {
-    rel: "script",
-    href: "/refresh-fix.js",
-  },
+  }
 ];
 
 // Para evitar problemas de anidamiento, solo tenemos un componente raíz
@@ -77,10 +71,31 @@ export default function App() {
   const initialTheme = ((data?.theme === 'light' || data?.theme === 'dark') ? data.theme : 'light') as Theme;
   const [theme, setTheme] = useState<Theme>(initialTheme);
   
-  // Initialize Amplify on the client side
-  if (typeof window !== 'undefined' && data.amplifyConfig) {
-    Amplify.configure(data.amplifyConfig);
-  }
+  // Aplicamos protección contra redeclaración de RefreshRuntime
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Configuración global para AWS Amplify
+    if (!(window as any).global) (window as any).global = window;
+    if (!(window as any).process) {
+      (window as any).process = { 
+        env: { NODE_ENV: 'production' },
+        nextTick: (callback: Function) => setTimeout(callback, 0)
+      };
+    }
+    if (!(window as any).Buffer) {
+      (window as any).Buffer = {
+        isBuffer: (obj: any) => false,
+        from: () => ({}),
+        alloc: () => ({})
+      };
+    }
+
+    // Inicializar Amplify
+    if (data.amplifyConfig) {
+      Amplify.configure(data.amplifyConfig);
+    }
+  }, [data.amplifyConfig]);
 
   // Efecto para aplicar el tema seleccionado
   useEffect(() => {
@@ -102,11 +117,17 @@ export default function App() {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <Meta />
           <Links />
+          <script dangerouslySetInnerHTML={{
+            __html: `
+              if (window.RefreshRuntime) {
+                window._refreshRuntime = window.RefreshRuntime;
+                delete window.RefreshRuntime;
+              }
+            `
+          }} />
         </head>
         <body className="bg-background text-foreground min-h-screen">
           <Outlet />
-          <ScrollRestoration />
-          <Scripts />
         </body>
       </html>
     </ThemeContext.Provider>
