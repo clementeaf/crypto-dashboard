@@ -8,10 +8,27 @@ import {
 } from "@remix-run/react";
 import { json } from "@remix-run/node";
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
-import { useState, useEffect } from "react";
+import { useState, useEffect, createContext, useContext } from "react";
 
-// Importamos nuestro archivo principal de estilos en lugar de tailwind.css
-import "./styles/index.css";
+// Importamos el archivo tailwind.css directamente
+import "./tailwind.css";
+
+// Definimos el contexto de tema
+type Theme = 'light' | 'dark';
+interface ThemeContextType {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
+}
 
 // Obtenemos la preferencia de tema del usuario
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -20,7 +37,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     .split(";")
     .find((cookie) => cookie.trim().startsWith("theme="));
     
-  const theme = cookieTheme ? cookieTheme.split("=")[1] : "system";
+  const theme = cookieTheme ? cookieTheme.split("=")[1] : "light";
   
   return json({ theme });
 }
@@ -42,69 +59,39 @@ export const links: LinksFunction = () => [
   },
 ];
 
-// Función para detectar si el sistema está en modo oscuro
-function getSystemTheme(): 'light' | 'dark' {
-  if (typeof window === 'undefined') return 'light';
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-}
-
-export function Layout({ children }: { children: React.ReactNode }) {
-  const { theme } = useLoaderData<typeof loader>();
-  const [themeMode, setThemeMode] = useState<'light' | 'dark' | 'system'>(
-    theme as 'light' | 'dark' | 'system'
-  );
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+// Para evitar problemas de anidamiento, solo tenemos un componente raíz
+export default function App() {
+  const data = useLoaderData<typeof loader>();
+  const initialTheme = ((data?.theme === 'light' || data?.theme === 'dark') ? data.theme : 'light') as Theme;
+  const [theme, setTheme] = useState<Theme>(initialTheme);
 
   // Efecto para aplicar el tema seleccionado
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark', 'dark-auto');
-
-    let effectiveTheme: 'light' | 'dark';
-    if (themeMode === 'system') {
-      effectiveTheme = getSystemTheme();
-      root.classList.add('dark-auto');
-    } else {
-      effectiveTheme = themeMode;
-      root.classList.add(themeMode);
-    }
+    root.classList.remove('light', 'dark');
+    root.classList.add(theme);
     
-    setResolvedTheme(effectiveTheme);
-
     // Guardar preferencia en cookie
-    document.cookie = `theme=${themeMode};path=/;max-age=31536000`;
-    
-    // Escuchar cambios en el tema del sistema
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = (e: MediaQueryListEvent) => {
-      if (themeMode === 'system') {
-        setResolvedTheme(e.matches ? 'dark' : 'light');
-      }
-    };
-    
-    mediaQuery.addEventListener('change', handleChange);
-    return () => {
-      mediaQuery.removeEventListener('change', handleChange);
-    };
-  }, [themeMode]);
+    document.cookie = `theme=${theme};path=/;max-age=31536000`;
+  }, [theme]);
 
   return (
-    <html lang="es" className={resolvedTheme}>
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <Meta />
-        <Links />
-      </head>
-      <body className="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 min-h-screen transition-colors duration-300">
-        {children}
-        <ScrollRestoration />
-        <Scripts />
-      </body>
-    </html>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      <html lang="es" className={theme}>
+        <head>
+          <meta charSet="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <Meta />
+          <Links />
+        </head>
+        <body className="bg-background text-foreground min-h-screen">
+          <Outlet />
+          <ScrollRestoration />
+          <Scripts />
+        </body>
+      </html>
+    </ThemeContext.Provider>
   );
-}
-
-export default function App() {
-  return <Outlet />;
 }

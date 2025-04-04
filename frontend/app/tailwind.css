@@ -2,11 +2,154 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  @apply bg-white dark:bg-gray-950;
+/* Aplicar tema del sistema si está en auto-dark */
+.dark-auto {
+  @apply dark;
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
+@layer components {
+  .crypto-card {
+    @apply bg-card rounded-xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-border;
+  }
+  
+  .btn {
+    @apply px-4 py-2 rounded-full font-medium text-sm focus:outline-none transition-all duration-200;
+  }
+  
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+  
+  .btn-md {
+    @apply px-4 py-2 text-sm;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-secondary-foreground hover:bg-secondary/90;
+  }
+  
+  .btn-icon {
+    @apply p-2 flex items-center justify-center;
+  }
+  
+  .input {
+    @apply px-4 py-2 border border-input rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground;
+  }
+
+  /* Mantener colores para indicadores de tendencia */
+  .trend-up {
+    @apply text-green-500 dark:text-green-400;
+  }
+  
+  .trend-down {
+    @apply text-red-500 dark:text-red-400;
+  }
+  
+  /* Estilos tipo Grok */
+  .grok-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
+  }
+  
+  .grok-header {
+    @apply flex justify-between items-center mb-8 pb-6 border-b border-border;
+  }
+  
+  .grok-card-grid {
+    @apply grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4;
+  }
+  
+  .grok-card {
+    @apply relative bg-card rounded-xl border border-border overflow-hidden;
+  }
+  
+  .grok-card-content {
+    @apply p-5;
+  }
+  
+  .grok-badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+  
+  .grok-badge-primary {
+    @apply bg-primary/10 text-primary;
+  }
+  
+  .grok-badge-secondary {
+    @apply bg-secondary text-secondary-foreground;
+  }
+  
+  .grok-search {
+    @apply relative w-full max-w-md;
+  }
+  
+  .grok-search-container {
+    @apply relative w-full max-w-md;
+  }
+  
+  .grok-search-input {
+    @apply px-4 py-2 w-full border border-input rounded-full text-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-colors bg-background text-foreground placeholder:text-muted-foreground;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 220 14% 96%;
+    --foreground: 224 71% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+    --primary: 262 83% 58%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 220 14% 90%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 8% 46%;
+    --accent: 262 83% 58%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 262 83% 58%;
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 224 71% 4%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+    --popover: 224 71% 4%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 263 85% 58%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 263 85% 58%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 263 85% 58%;
+  }
+
+  * {
+    @apply border-border;
+  }
+  
+  html, body {
+    @apply antialiased h-full;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans;
   }
 }

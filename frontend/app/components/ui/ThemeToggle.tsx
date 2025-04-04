@@ -1,56 +1,23 @@
-import { useEffect, useState } from 'react';
-import { saveThemePreference, getThemePreference } from '~/utils/storage';
-
-type Theme = 'light' | 'dark' | 'system';
+import { useTheme } from '~/root';
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>('system');
-  const [mounted, setMounted] = useState(false);
-  
-  // Load theme when component mounts
-  useEffect(() => {
-    setMounted(true);
-    const savedTheme = getThemePreference();
-    setTheme(savedTheme);
-  }, []);
-  
-  // Apply theme when it changes
-  useEffect(() => {
-    if (!mounted) return;
-    
-    const root = window.document.documentElement;
-    root.classList.remove('light', 'dark', 'dark-auto');
-    
-    saveThemePreference(theme);
-    
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light';
-      root.classList.add(systemTheme === 'dark' ? 'dark-auto' : 'light');
-    } else {
-      root.classList.add(theme);
-    }
-  }, [theme, mounted]);
-  
-  // Avoid server-side rendering to prevent hydration issues
-  if (!mounted) return null;
+  const { theme, setTheme } = useTheme();
   
   return (
-    <div className="flex items-center bg-secondary/50 rounded-full p-1 shadow-inner">
-      <button
+    <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg shadow-inner">
+      <button 
         onClick={() => setTheme('light')}
-        className={`relative p-1.5 rounded-full transition-all duration-200 ease-in-out ${
+        className={`flex items-center justify-center p-2 rounded-md text-sm transition-colors ${
           theme === 'light' 
-            ? 'bg-white text-black shadow-sm translate-y-[-1px]' 
-            : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+            ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' 
+            : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
         }`}
-        aria-label="Light mode"
-        title="Light mode"
+        aria-label="Modo claro"
+        title="Modo claro"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4"
+          className="h-4 w-4 sm:h-5 sm:w-5"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
@@ -60,50 +27,28 @@ export default function ThemeToggle() {
             clipRule="evenodd"
           />
         </svg>
+        <span className="hidden sm:inline ml-1.5">Claro</span>
       </button>
       
       <button
         onClick={() => setTheme('dark')}
-        className={`relative p-1.5 rounded-full transition-all duration-200 ease-in-out ${
-          theme === 'dark' 
-            ? 'bg-primary text-white shadow-sm translate-y-[-1px]' 
-            : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+        className={`flex items-center justify-center p-2 rounded-md text-sm transition-colors ${
+          theme === 'dark' || theme === 'system'
+            ? 'bg-gray-900 text-blue-400 shadow-sm' 
+            : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
         }`}
-        aria-label="Dark mode"
-        title="Dark mode"
+        aria-label="Modo oscuro"
+        title="Modo oscuro"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4"
+          className="h-4 w-4 sm:h-5 sm:w-5"
           viewBox="0 0 20 20"
           fill="currentColor"
         >
           <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
         </svg>
-      </button>
-      
-      <button
-        onClick={() => setTheme('system')}
-        className={`relative p-1.5 rounded-full transition-all duration-200 ease-in-out ${
-          theme === 'system' 
-            ? 'bg-secondary text-foreground shadow-sm translate-y-[-1px]' 
-            : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
-        }`}
-        aria-label="Use system settings"
-        title="Use system settings"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-4 w-4"
-          viewBox="0 0 20 20"
-          fill="currentColor"
-        >
-          <path
-            fillRule="evenodd"
-            d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z"
-            clipRule="evenodd"
-          />
-        </svg>
+        <span className="hidden sm:inline ml-1.5">Oscuro</span>
       </button>
     </div>
   );
