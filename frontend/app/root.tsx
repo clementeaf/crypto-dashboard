@@ -65,6 +65,10 @@ export const links: LinksFunction = () => [
     rel: "stylesheet",
     href: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap",
   },
+  {
+    rel: "script",
+    href: "/refresh-fix.js",
+  },
 ];
 
 // Para evitar problemas de anidamiento, solo tenemos un componente raíz
