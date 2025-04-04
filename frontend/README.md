@@ -46,6 +46,34 @@ La aplicación sigue la estructura estándar de Remix con las siguientes adicion
 - `/app/utils`: Utilidades y funciones auxiliares
 - `/app/styles`: Estilos CSS (Tailwind CSS)
 
+## Testing
+
+El proyecto utiliza Vitest y Testing Library para las pruebas unitarias y de integración:
+
+```bash
+# Ejecutar todas las pruebas
+npm run test
+
+# Ejecutar pruebas con observador (modo watch)
+npm run test:watch
+
+# Ejecutar pruebas con cobertura
+npm run test:coverage
+
+# Ejecutar pruebas para un componente específico
+npm run test -- -t "Dashboard"
+```
+
+### Cobertura actual:
+- Dashboard component: 83.33% de cobertura
+- Se continuarán añadiendo pruebas para otros componentes (CryptoCard, SearchFilter, ThemeToggle)
+
+### Herramientas de testing:
+- Vitest: Framework de pruebas
+- Testing Library: Utilidades para probar componentes de React
+- vi.mock: Para simular módulos y funciones
+- userEvent: Para simular interacciones del usuario
+
 ## API
 
 La aplicación utiliza la API pública de Coinbase para obtener datos de criptomonedas en tiempo real.

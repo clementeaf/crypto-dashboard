@@ -70,6 +70,7 @@ npm run dev
 For more information, check:
 - [CHANGELOG.md](CHANGELOG.md) - Version history
 - [ROADMAP.md](ROADMAP.md) - Development roadmap
+- [frontend/README.md](frontend/README.md) - Frontend development guide and testing information
 
 ## License
 
