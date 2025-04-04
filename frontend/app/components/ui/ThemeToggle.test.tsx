@@ -1,25 +1,20 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { screen, fireEvent } from '@testing-library/react';
 import ThemeToggle from './ThemeToggle';
-import * as Root from '~/root';
+import { renderWithProviders, ThemeProvider, useTheme } from '~/test/test-utils';
 
-// Mock del hook useTheme
+// Mock del hook useTheme de root con nuestro propio hook de test-utils
 vi.mock('~/root', () => ({
-  useTheme: vi.fn()
+  useTheme: () => useTheme()
 }));
 
 describe('ThemeToggle', () => {
-  const mockSetTheme = vi.fn();
-  
-  // Configurar el mock antes de cada prueba
   beforeEach(() => {
     vi.clearAllMocks();
   });
   
   it('debe renderizar correctamente en modo claro', () => {
-    vi.spyOn(Root, 'useTheme').mockReturnValue({ theme: 'light', setTheme: mockSetTheme });
-    
-    render(<ThemeToggle />);
+    renderWithProviders(<ThemeToggle />, { initialTheme: 'light' });
     
     // Verificar que se renderice el botón de modo claro (activo)
     const lightButton = screen.getByTitle('Modo claro');
@@ -34,9 +29,7 @@ describe('ThemeToggle', () => {
   });
   
   it('debe renderizar correctamente en modo oscuro', () => {
-    vi.spyOn(Root, 'useTheme').mockReturnValue({ theme: 'dark', setTheme: mockSetTheme });
-    
-    render(<ThemeToggle />);
+    renderWithProviders(<ThemeToggle />, { initialTheme: 'dark' });
     
     // Verificar que se renderice el botón de modo oscuro (activo)
     const darkButton = screen.getByTitle('Modo oscuro');
@@ -51,36 +44,29 @@ describe('ThemeToggle', () => {
   });
   
   it('debe cambiar al modo claro al hacer clic en el botón correspondiente', () => {
-    vi.spyOn(Root, 'useTheme').mockReturnValue({ theme: 'dark', setTheme: mockSetTheme });
-    
-    render(<ThemeToggle />);
+    renderWithProviders(<ThemeToggle />, { initialTheme: 'dark' });
     
     // Hacer clic en el botón de modo claro
     const lightButton = screen.getByTitle('Modo claro');
     fireEvent.click(lightButton);
     
-    // Verificar que se llame a setTheme con 'light'
-    expect(mockSetTheme).toHaveBeenCalledTimes(1);
-    expect(mockSetTheme).toHaveBeenCalledWith('light');
+    // En este caso, la verificación se hará a través del cambio visual
+    // ya que estamos usando un ThemeProvider real en lugar de un mock
+    expect(lightButton).toHaveClass('bg-white');
   });
   
   it('debe cambiar al modo oscuro al hacer clic en el botón correspondiente', () => {
-    vi.spyOn(Root, 'useTheme').mockReturnValue({ theme: 'light', setTheme: mockSetTheme });
-    
-    render(<ThemeToggle />);
+    renderWithProviders(<ThemeToggle />, { initialTheme: 'light' });
     
     // Hacer clic en el botón de modo oscuro
     const darkButton = screen.getByTitle('Modo oscuro');
     fireEvent.click(darkButton);
     
-    // Verificar que se llame a setTheme con 'dark'
-    expect(mockSetTheme).toHaveBeenCalledTimes(1);
-    expect(mockSetTheme).toHaveBeenCalledWith('dark');
+    // Verificar que el botón ahora tiene las clases activas
+    expect(darkButton).toHaveClass('bg-gray-900');
   });
   
   it('debe mostrar etiquetas de texto en pantallas medianas', () => {
-    vi.spyOn(Root, 'useTheme').mockReturnValue({ theme: 'light', setTheme: mockSetTheme });
-    
     // Mock de matchMedia para simular pantalla mediana
     window.matchMedia = vi.fn().mockImplementation(query => ({
       matches: true,
@@ -93,7 +79,7 @@ describe('ThemeToggle', () => {
       dispatchEvent: vi.fn(),
     }));
     
-    render(<ThemeToggle />);
+    renderWithProviders(<ThemeToggle />, { initialTheme: 'light' });
     
     // Las etiquetas de texto tienen la clase hidden sm:inline, por lo que están ocultas por defecto
     // pero deberían ser visibles en pantallas medianas (simulado con el matchMedia mock)

@@ -9,26 +9,36 @@ declare module "@remix-run/node" {
   }
 }
 
-export default defineConfig({
-  plugins: [
-    remix({
-      future: {
-        v3_fetcherPersist: true,
-        v3_relativeSplatPath: true,
-        v3_throwAbortReason: true,
-        v3_singleFetch: true,
-        v3_lazyRouteDiscovery: true,
+export default defineConfig(({ mode }) => {
+  if (mode === 'test') {
+    // Configuración específica para pruebas
+    return {
+      plugins: [react(), tsconfigPaths()],
+      test: {
+        globals: true,
+        environment: 'jsdom',
+        setupFiles: ['./app/test/setup-test-env.ts'],
+        include: ['./app/**/*.test.{ts,tsx}'],
+        exclude: ['./app/routes/**'],
+        css: false,
       },
-    }),
-    react(),
-    tsconfigPaths(),
-  ],
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: ['./app/test/setup-test-env.ts'],
-    include: ['./app/**/*.test.{ts,tsx}'],
-    exclude: ['./app/routes/**'],
-    css: false,
-  },
+    };
+  }
+
+  // Configuración para desarrollo y producción
+  return {
+    plugins: [
+      remix({
+        future: {
+          v3_fetcherPersist: true,
+          v3_relativeSplatPath: true,
+          v3_throwAbortReason: true,
+          v3_singleFetch: true,
+          v3_lazyRouteDiscovery: true,
+        },
+      }),
+      react(),
+      tsconfigPaths(),
+    ],
+  };
 });

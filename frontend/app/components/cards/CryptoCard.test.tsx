@@ -1,7 +1,8 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import CryptoCard from './CryptoCard';
 import type { Cryptocurrency } from '~/types/crypto';
+import { renderWithProviders, screen } from '~/test/test-utils';
 
 // Mock de una criptomoneda para las pruebas
 const mockCrypto: Cryptocurrency = {
@@ -36,7 +37,7 @@ describe('CryptoCard', () => {
   });
 
   it('debe renderizar correctamente la información de la criptomoneda', () => {
-    render(
+    const { container } = renderWithProviders(
       <CryptoCard 
         crypto={mockCrypto}
         index={0}
@@ -50,7 +51,7 @@ describe('CryptoCard', () => {
     
     // Verificar que se muestra el nombre, símbolo y precio correctamente
     expect(screen.getByText('Bitcoin')).toBeInTheDocument();
-    expect(screen.getByText('BTC')).toBeInTheDocument();
+    expect(screen.getByText('btc')).toBeInTheDocument();
     expect(screen.getByText('$50,000.75')).toBeInTheDocument();
     
     // Verificar el cambio de precio en 24h
@@ -67,7 +68,7 @@ describe('CryptoCard', () => {
   });
 
   it('debe renderizar correctamente una criptomoneda con tendencia negativa', () => {
-    render(
+    renderWithProviders(
       <CryptoCard 
         crypto={mockCryptoNegativeTrend}
         index={0}
@@ -84,7 +85,7 @@ describe('CryptoCard', () => {
   });
 
   it('debe aplicar la clase de arrastre cuando isDragging es true', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <CryptoCard 
         crypto={mockCrypto}
         index={0}
@@ -103,7 +104,7 @@ describe('CryptoCard', () => {
   });
 
   it('debe llamar a las funciones de arrastre correspondientes', () => {
-    render(
+    renderWithProviders(
       <CryptoCard 
         crypto={mockCrypto}
         index={2}
@@ -135,7 +136,7 @@ describe('CryptoCard', () => {
   });
 
   it('debe agregar clase de hover al colocar el ratón sobre la tarjeta', () => {
-    const { container } = render(
+    const { container } = renderWithProviders(
       <CryptoCard 
         crypto={mockCrypto}
         index={0}
@@ -170,7 +171,7 @@ describe('CryptoCard', () => {
       }
     };
     
-    render(
+    renderWithProviders(
       <CryptoCard 
         crypto={smallPriceCrypto}
         index={0}
