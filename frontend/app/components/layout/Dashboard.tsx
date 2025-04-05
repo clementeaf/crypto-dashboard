@@ -4,7 +4,7 @@ import CryptoCard from '~/components/cards/CryptoCard';
 import SearchFilter from '~/components/ui/SearchFilter';
 import ThemeToggle from '~/components/ui/ThemeToggle';
 import type { Cryptocurrency } from '~/types/crypto';
-import { getTimeSinceLastRefresh, setLastRefreshTime } from '~/utils/storage';
+import { getTimeSinceLastRefresh, setLastRefreshTime, getCardOrder, saveCardOrder } from '~/utils/storage';
 
 interface DashboardProps {
   cryptocurrencies: Cryptocurrency[];
@@ -22,9 +22,44 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
   const [filteredCryptos, setFilteredCryptos] = useState<Cryptocurrency[]>(cryptocurrencies);
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
   
-  // Update cryptos when cryptocurrencies prop changes
+  // Update cryptos when cryptocurrencies prop changes, respecting saved order
   useEffect(() => {
-    setCryptos(cryptocurrencies);
+    // Solo intentamos ordenar si hay criptomonedas
+    if (cryptocurrencies.length === 0) {
+      setCryptos([]);
+      return;
+    }
+    
+    // Intentamos obtener el orden guardado de localStorage
+    const savedOrder = getCardOrder();
+    
+    if (savedOrder && savedOrder.length > 0) {
+      // Creamos un mapa para acceso rápido a las criptomonedas por id
+      const cryptoMap = new Map<string, Cryptocurrency>();
+      cryptocurrencies.forEach(crypto => cryptoMap.set(crypto.id, crypto));
+      
+      // Creamos un nuevo array ordenado basado en los IDs guardados
+      const orderedCryptos: Cryptocurrency[] = [];
+      
+      // Primero agregamos las criptomonedas que tienen un orden guardado
+      savedOrder.forEach(id => {
+        const crypto = cryptoMap.get(id);
+        if (crypto) {
+          orderedCryptos.push(crypto);
+          cryptoMap.delete(id);
+        }
+      });
+      
+      // Luego agregamos cualquier criptomoneda nueva que no estaba en el orden guardado
+      cryptoMap.forEach(crypto => {
+        orderedCryptos.push(crypto);
+      });
+      
+      setCryptos(orderedCryptos);
+    } else {
+      // Si no hay orden guardado, usamos el orden predeterminado
+      setCryptos(cryptocurrencies);
+    }
   }, [cryptocurrencies]);
   
   // Filter cryptocurrencies based on search term
@@ -93,6 +128,12 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
     setLastRefreshTime();
   }, [onRefresh]);
   
+  // Guardar el orden actual en localStorage
+  const saveCurrentOrder = useCallback((newCryptos: Cryptocurrency[]) => {
+    const cryptoIds = newCryptos.map(crypto => crypto.id);
+    saveCardOrder(cryptoIds);
+  }, []);
+  
   // Drag and drop handlers
   const handleDragStart = (index: number) => {
     setDraggedItemIndex(index);
@@ -115,6 +156,9 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
     
     // Update the state with the new array
     setCryptos(newCryptos);
+    
+    // Guardar el nuevo orden en localStorage
+    saveCurrentOrder(newCryptos);
     
     // Update the dragged item index
     setDraggedItemIndex(index);
@@ -161,8 +205,8 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
       
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-semibold">Cryptocurrencies</h2>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Showing {filteredCryptos.length} of {cryptocurrencies.length} cryptocurrencies
+        <div className="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
+          {filteredCryptos.length} of {cryptocurrencies.length}
         </div>
       </div>
       
