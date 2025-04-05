@@ -18,23 +18,30 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
   const [timeSinceRefresh, setTimeSinceRefresh] = useState<number | null>(null);
   const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [cryptos, setCryptos] = useState<Cryptocurrency[]>(cryptocurrencies);
   const [filteredCryptos, setFilteredCryptos] = useState<Cryptocurrency[]>(cryptocurrencies);
+  const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+  
+  // Update cryptos when cryptocurrencies prop changes
+  useEffect(() => {
+    setCryptos(cryptocurrencies);
+  }, [cryptocurrencies]);
   
   // Filter cryptocurrencies based on search term
   useEffect(() => {
     if (!searchTerm.trim()) {
-      setFilteredCryptos(cryptocurrencies);
+      setFilteredCryptos(cryptos);
       return;
     }
     
     const normalizedSearchTerm = searchTerm.toLowerCase().trim();
-    const filtered = cryptocurrencies.filter(crypto => 
+    const filtered = cryptos.filter(crypto => 
       crypto.name.toLowerCase().includes(normalizedSearchTerm) || 
       crypto.symbol.toLowerCase().includes(normalizedSearchTerm)
     );
     
     setFilteredCryptos(filtered);
-  }, [cryptocurrencies, searchTerm]);
+  }, [cryptos, searchTerm]);
   
   // Format time since last refresh
   const formatTimeSinceRefresh = () => {
@@ -86,6 +93,41 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
     setLastRefreshTime();
   }, [onRefresh]);
   
+  // Drag and drop handlers
+  const handleDragStart = (index: number) => {
+    setDraggedItemIndex(index);
+  };
+  
+  const handleDragEnter = (index: number) => {
+    if (draggedItemIndex === null || draggedItemIndex === index) return;
+    
+    // Create a copy of the current crypto list
+    const newCryptos = [...cryptos];
+    
+    // Get the item that is being dragged
+    const draggedItem = newCryptos[draggedItemIndex];
+    
+    // Remove it from the array
+    newCryptos.splice(draggedItemIndex, 1);
+    
+    // Add it at the new position
+    newCryptos.splice(index, 0, draggedItem);
+    
+    // Update the state with the new array
+    setCryptos(newCryptos);
+    
+    // Update the dragged item index
+    setDraggedItemIndex(index);
+  };
+  
+  const handleDragEnd = () => {
+    setDraggedItemIndex(null);
+  };
+  
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+  
   return (
     <div className="max-w-7xl mx-auto px-4 py-6">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -97,46 +139,9 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
         </div>
         
         <div className="flex flex-wrap items-center gap-3">
-          <div className="mr-1">
+          <div>
             <ThemeToggle />
           </div>
-          
-          <div className="text-sm text-gray-500 dark:text-gray-400">
-            Updated: <span className="font-medium">{formatTimeSinceRefresh()} ago</span>
-          </div>
-          
-          <button 
-            className="px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-            onClick={handleRefresh}
-            disabled={isLoading}
-          >
-            <div className="flex items-center gap-1.5">
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-              {isLoading ? 'Updating...' : 'Refresh'}
-            </div>
-          </button>
-          
-          <label className="flex items-center gap-2 cursor-pointer">
-            <div className="relative">
-              <input 
-                type="checkbox" 
-                className="sr-only" 
-                checked={isAutoRefreshEnabled}
-                onChange={(e) => setIsAutoRefreshEnabled(e.target.checked)}
-              />
-              <div className={`block w-10 h-5 rounded-full transition-colors ${isAutoRefreshEnabled ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}></div>
-              <div className={`absolute left-0.5 top-0.5 bg-white w-4 h-4 rounded-full transition-transform ${isAutoRefreshEnabled ? 'translate-x-5' : 'translate-x-0'}`}></div>
-            </div>
-            <span className="text-sm">Auto</span>
-          </label>
         </div>
       </header>
       
@@ -228,14 +233,14 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
           {filteredCryptos.map((crypto, index) => (
             <CryptoCard
-              key={crypto.id}
+              key={crypto.id + '-' + index}
               crypto={crypto}
               index={index}
-              isDragging={false}
-              onDragStart={() => {}}
-              onDragEnter={() => {}}
-              onDragEnd={() => {}}
-              onDragOver={(e) => { e.preventDefault(); }}
+              isDragging={draggedItemIndex === index}
+              onDragStart={handleDragStart}
+              onDragEnter={handleDragEnter}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
             />
           ))}
         </div>
