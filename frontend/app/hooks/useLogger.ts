@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 type LogEntry = {
   message: string;
@@ -27,7 +27,23 @@ export function useLogger(options: UseLoggerOptions = {}) {
     persistLogs = false,
   } = options;
 
+  // Usar useRef para evitar recrear funciones en cada render
+  const optionsRef = useRef({ maxLogs, captureConsole, sources, persistLogs });
+  
+  // Actualizar refs cuando cambien las opciones
+  useEffect(() => {
+    optionsRef.current = { maxLogs, captureConsole, sources, persistLogs };
+  }, [maxLogs, captureConsole, sources.join(','), persistLogs]);
+
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  
+  // Referencia para funciones originales de consola
+  const originalConsoleRef = useRef<{
+    log: typeof console.log,
+    error: typeof console.error,
+    warn: typeof console.warn,
+    info: typeof console.info
+  }>();
 
   // Añadir una entrada de log
   const addLog = useCallback((message: string, type: LogEntry['type'] = 'log', source?: string) => {
@@ -39,10 +55,10 @@ export function useLogger(options: UseLoggerOptions = {}) {
     };
 
     setLogs(prev => {
-      const newLogs = [entry, ...prev].slice(0, maxLogs);
+      const newLogs = [entry, ...prev].slice(0, optionsRef.current.maxLogs);
       
       // Persistir logs si está habilitado
-      if (persistLogs) {
+      if (optionsRef.current.persistLogs) {
         try {
           localStorage.setItem('app_logs', JSON.stringify(newLogs));
         } catch (error) {
@@ -54,9 +70,9 @@ export function useLogger(options: UseLoggerOptions = {}) {
     });
     
     return entry;
-  }, [maxLogs, persistLogs]);
+  }, []);
 
-  // Métodos para diferentes tipos de logs
+  // Métodos para diferentes tipos de logs - ahora son estables entre renders
   const log = useCallback((message: any, source?: string) => addLog(message, 'log', source), [addLog]);
   const error = useCallback((message: any, source?: string) => addLog(message, 'error', source), [addLog]);
   const warn = useCallback((message: any, source?: string) => addLog(message, 'warn', source), [addLog]);
@@ -65,56 +81,130 @@ export function useLogger(options: UseLoggerOptions = {}) {
   // Limpiar todos los logs
   const clearLogs = useCallback(() => {
     setLogs([]);
-    if (persistLogs) {
+    if (optionsRef.current.persistLogs) {
       try {
         localStorage.removeItem('app_logs');
       } catch (error) {
         // Silenciar errores de localStorage
       }
     }
-  }, [persistLogs]);
+  }, []);
 
-  // Capturar console.log, console.error, etc.
+  // Referencias a las funciones de logging para usar en los overrides
+  const logFunctionsRef = useRef({ log, error, warn, info });
+  
+  // Actualizar referencias cuando cambien las funciones
   useEffect(() => {
-    if (!captureConsole) return;
+    logFunctionsRef.current = { log, error, warn, info };
+  }, [log, error, warn, info]);
 
-    const originalConsole = {
+  // Capturar console.log, console.error, etc. - Ahora con control para evitar bucles
+  useEffect(() => {
+    // Solo hacer override si captureConsole es true y no lo hemos hecho antes
+    if (!captureConsole || originalConsoleRef.current) return;
+    
+    // Guardar los métodos originales
+    originalConsoleRef.current = {
       log: console.log,
       error: console.error,
       warn: console.warn,
       info: console.info,
     };
 
+    // Flag para prevenir recursión
+    let isLogging = false;
+    
+    // Override para console.log
     console.log = (...args) => {
-      originalConsole.log(...args);
-      log(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' '));
+      if (isLogging) {
+        // Si ya estamos logeando, llamar al método original para evitar bucles
+        originalConsoleRef.current!.log(...args);
+        return;
+      }
+      
+      isLogging = true;
+      originalConsoleRef.current!.log(...args);
+      
+      try {
+        // Usar la referencia más reciente a la función log
+        logFunctionsRef.current.log(
+          args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ')
+        );
+      } finally {
+        isLogging = false;
+      }
     };
 
+    // Override para console.error
     console.error = (...args) => {
-      originalConsole.error(...args);
-      error(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' '));
+      if (isLogging) {
+        originalConsoleRef.current!.error(...args);
+        return;
+      }
+      
+      isLogging = true;
+      originalConsoleRef.current!.error(...args);
+      
+      try {
+        logFunctionsRef.current.error(
+          args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ')
+        );
+      } finally {
+        isLogging = false;
+      }
     };
 
+    // Override para console.warn
     console.warn = (...args) => {
-      originalConsole.warn(...args);
-      warn(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' '));
+      if (isLogging) {
+        originalConsoleRef.current!.warn(...args);
+        return;
+      }
+      
+      isLogging = true;
+      originalConsoleRef.current!.warn(...args);
+      
+      try {
+        logFunctionsRef.current.warn(
+          args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ')
+        );
+      } finally {
+        isLogging = false;
+      }
     };
 
+    // Override para console.info
     console.info = (...args) => {
-      originalConsole.info(...args);
-      info(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' '));
+      if (isLogging) {
+        originalConsoleRef.current!.info(...args);
+        return;
+      }
+      
+      isLogging = true;
+      originalConsoleRef.current!.info(...args);
+      
+      try {
+        logFunctionsRef.current.info(
+          args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ')
+        );
+      } finally {
+        isLogging = false;
+      }
     };
 
     // Restaurar los métodos originales cuando se desmonte el componente
     return () => {
-      console.log = originalConsole.log;
-      console.error = originalConsole.error;
-      console.warn = originalConsole.warn;
-      console.info = originalConsole.info;
+      if (originalConsoleRef.current) {
+        console.log = originalConsoleRef.current.log;
+        console.error = originalConsoleRef.current.error;
+        console.warn = originalConsoleRef.current.warn;
+        console.info = originalConsoleRef.current.info;
+        originalConsoleRef.current = undefined;
+      }
     };
-  }, [captureConsole, log, error, warn, info]);
+  }, [captureConsole]); // Solo depende de captureConsole, no de las funciones de logging
 
-  // Cargar logs persistentes si está habilitado
+  // Cargar logs persistentes si está habilitado (solo una vez al inicio)
   useEffect(() => {
     if (persistLogs) {
       try {

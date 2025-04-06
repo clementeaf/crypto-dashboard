@@ -79,36 +79,8 @@ export default function DashboardRoute() {
   // Usar AuthContext
   const { user, isLoggedIn, logout } = useAuth();
   
-  // Usar ThemeContext
+  // Usar ThemeContext - Solo la referencia, no usamos en efectos para evitar loops
   const { isDark } = useTheme();
-  
-  // Verificar autenticación del lado del cliente
-  useEffect(() => {
-    // Verificación más estricta
-    if (!isLoggedIn) {
-      console.log("Usuario no autenticado, redirigiendo a login");
-      navigate("/login", { replace: true });
-      return;
-    } else {
-      console.log("Usuario autenticado:", user);
-    }
-  }, [isLoggedIn, navigate, user]);
-  
-  // Si no está autenticado, no renderizar nada mientras redirige
-  if (!isLoggedIn) {
-    console.log("No autenticado, renderizando nada mientras redirige");
-    return <div className="bg-gray-100 dark:bg-gray-900 min-h-screen"></div>;
-  }
-  
-  // Obtener revalidator para actualizar los datos
-  const revalidator = useRevalidator();
-  
-  // Usar el hook personalizado de logging
-  const logger = useLogger({
-    maxLogs: 100,
-    captureConsole: true,
-    persistLogs: false
-  });
   
   // Estado para controles de UI
   const [showLogs, setShowLogs] = useState(false);
@@ -129,44 +101,72 @@ export default function DashboardRoute() {
   const [refreshInterval, setRefreshInterval] = useState(60); // segundos
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+  
+  // Inicializar logger con useRef para evitar recrearlo en cada render
+  const loggerRef = useRef(useLogger({
+    maxLogs: 100,
+    captureConsole: true,
+    persistLogs: false
+  }));
+
+  // Obtener revalidator para actualizar los datos
+  const revalidator = useRevalidator();
+  
+  // Verificar autenticación del lado del cliente
+  useEffect(() => {
+    // Verificación más estricta
+    if (!isLoggedIn) {
+      console.log("Usuario no autenticado, redirigiendo a login");
+      navigate("/login", { replace: true });
+      return;
+    } else {
+      console.log("Usuario autenticado:", user);
+    }
+  }, [isLoggedIn, navigate, user]);
+  
+  // Si no está autenticado, no renderizar nada mientras redirige
+  if (!isLoggedIn) {
+    console.log("No autenticado, renderizando nada mientras redirige");
+    return <div className="bg-gray-100 dark:bg-gray-900 min-h-screen"></div>;
+  }
 
   // Función para cerrar sesión
   const handleLogout = useCallback(() => {
-    logger.info("Usuario cerró sesión", "auth");
+    loggerRef.current.info("Usuario cerró sesión", "auth");
     logout();
     navigate("/login");
-  }, [navigate, logout, logger]);
+  }, [navigate, logout]);
   
   // Función para limpiar la caché
   const handleClearCache = useCallback(() => {
     setIsClearingCache(true);
-    logger.info('Limpiando caché...', 'cache');
+    loggerRef.current.info('Limpiando caché...', 'cache');
     
     try {
       clearCache();
-      logger.info('Caché limpiada correctamente', 'cache');
+      loggerRef.current.info('Caché limpiada correctamente', 'cache');
     } catch (error) {
-      logger.error(`Error al limpiar la caché: ${error}`, 'cache');
+      loggerRef.current.error(`Error al limpiar la caché: ${error}`, 'cache');
     } finally {
       setIsClearingCache(false);
     }
-  }, [logger]);
+  }, []);
   
   // Función para probar la API
-  const handleTestApi = async () => {
+  const handleTestApi = useCallback(async () => {
     setIsTestingApi(true);
-    logger.info('Iniciando prueba de conexión con la API...', 'api');
+    loggerRef.current.info('Iniciando prueba de conexión con la API...', 'api');
     
     try {
       const result = await testApiConnection();
-      logger.info('Resultado de la prueba de conexión:', 'api');
+      loggerRef.current.info('Resultado de la prueba de conexión:', 'api');
       
       setApiTestResult({
         ...result,
         timestamp: new Date().toLocaleTimeString()
       });
     } catch (err) {
-      logger.error(`Error al ejecutar la prueba de conexión: ${err}`, 'api');
+      loggerRef.current.error(`Error al ejecutar la prueba de conexión: ${err}`, 'api');
       
       setApiTestResult({
         success: false,
@@ -176,7 +176,7 @@ export default function DashboardRoute() {
     } finally {
       setIsTestingApi(false);
     }
-  };
+  }, []);
   
   // Toggle para actualización automática
   const handleToggleAutoRefresh = useCallback(() => {
@@ -191,14 +191,14 @@ export default function DashboardRoute() {
   // Callback para actualizar los datos
   const handleRefresh = useCallback(() => {
     // Limpiar logs previos
-    logger.clearLogs();
+    loggerRef.current.clearLogs();
     // Registrar inicio de actualización
-    logger.info('Iniciando actualización de datos...', 'refresh');
+    loggerRef.current.info('Iniciando actualización de datos...', 'refresh');
     // Actualizar datos
     revalidator.revalidate();
     // Actualizar la hora de última actualización
     setLastUpdated(new Date().toLocaleTimeString());
-  }, [revalidator, logger]);
+  }, [revalidator]);
   
   // Establecer última actualización al cargar por primera vez
   useEffect(() => {
@@ -215,9 +215,9 @@ export default function DashboardRoute() {
     
     // Si autoRefresh está habilitado, configurar el intervalo
     if (autoRefresh) {
-      logger.info(`[AUTO] Configurando actualización automática cada ${refreshInterval} segundos`, 'refresh');
+      loggerRef.current.info(`[AUTO] Configurando actualización automática cada ${refreshInterval} segundos`, 'refresh');
       intervalRef.current = setInterval(() => {
-        logger.info('[AUTO] Ejecutando actualización automática', 'refresh');
+        loggerRef.current.info('[AUTO] Ejecutando actualización automática', 'refresh');
         handleRefresh();
       }, refreshInterval * 1000);
     }
@@ -229,7 +229,7 @@ export default function DashboardRoute() {
         intervalRef.current = null;
       }
     };
-  }, [autoRefresh, refreshInterval, handleRefresh, logger]);
+  }, [autoRefresh, refreshInterval, handleRefresh]);
 
   return (
     <Dashboard 

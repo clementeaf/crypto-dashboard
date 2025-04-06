@@ -95,9 +95,27 @@ export const meta: MetaFunction = () => {
   ];
 };
 
+// Función para determinar si debemos usar el tema oscuro por defecto
+// Esto asegura que el servidor y el cliente tengan la misma clase inicial
+function getInitialDarkMode(): boolean {
+  // En el servidor, siempre asumimos dark mode por defecto
+  if (typeof window === 'undefined') return true;
+  
+  // En el cliente, verificamos localStorage
+  try {
+    const storedValue = localStorage.getItem('isDark');
+    return storedValue === null || storedValue === 'true';
+  } catch (e) {
+    return true; // Por defecto usamos dark mode
+  }
+}
+
+// Usamos una variable para determinar si añadimos la clase 'dark' por defecto
+const initialIsDark = getInitialDarkMode();
+
 export default function App() {
   return (
-    <html lang="es" className="h-full">
+    <html lang="es" className={`h-full ${initialIsDark ? 'dark' : ''}`}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -150,7 +168,7 @@ export function ErrorBoundary() {
   }
 
   return (
-    <html lang="es">
+    <html lang="es" className="h-full dark">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
