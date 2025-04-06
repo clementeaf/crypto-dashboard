@@ -1,19 +1,68 @@
 import { useTheme } from '~/root';
+import { useEffect, useState } from 'react';
+
+// Función para aplicar el tema directamente al DOM
+function applyThemeDirectly(theme: 'light' | 'dark' | 'system') {
+  const html = document.documentElement;
+  
+  if (theme === 'dark') {
+    html.classList.add('dark');
+  } else if (theme === 'light') {
+    html.classList.remove('dark');
+  } else if (theme === 'system') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+    }
+  }
+}
 
 export default function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  
+  // Solo después de montarse podemos acceder al tema actual
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  
+  // Manejador de cambio de tema con doble enfoque (contexto + DOM directo)
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
+    console.log(`ThemeToggle: Cambiando tema de ${theme} a ${newTheme}`);
+    
+    // Actualizar el contexto
+    setTheme(newTheme);
+    
+    // Aplicar directamente al DOM para mayor rapidez
+    applyThemeDirectly(newTheme);
+    
+    // Guardar en localStorage
+    localStorage.setItem('theme', newTheme);
+    
+    console.log(`ThemeToggle: Tema actualizado a ${newTheme}`);
+  };
+  
+  if (!mounted) {
+    // Renderizar un placeholder mientras se carga para evitar hidratación incorrecta
+    return (
+      <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg shadow-inner min-w-[144px] h-[40px]"></div>
+    );
+  }
   
   return (
-    <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg shadow-inner">
+    <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg shadow-inner select-none">
       <button 
-        onClick={() => setTheme('light')}
-        className={`flex items-center justify-center p-2 rounded-md text-sm transition-colors ${
+        onClick={() => handleThemeChange('light')}
+        className={`flex items-center justify-center p-2 rounded-md text-sm transition-all ${
           theme === 'light' 
-            ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm' 
+            ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm font-medium' 
             : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
         }`}
         aria-label="Modo claro"
         title="Modo claro"
+        type="button"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -31,14 +80,15 @@ export default function ThemeToggle() {
       </button>
       
       <button
-        onClick={() => setTheme('dark')}
-        className={`flex items-center justify-center p-2 rounded-md text-sm transition-colors ${
-          theme === 'dark' || theme === 'system'
-            ? 'bg-gray-900 text-blue-400 shadow-sm' 
+        onClick={() => handleThemeChange('dark')}
+        className={`flex items-center justify-center p-2 rounded-md text-sm transition-all ${
+          theme === 'dark'
+            ? 'bg-gray-900 text-blue-400 shadow-sm font-medium' 
             : 'hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400'
         }`}
         aria-label="Modo oscuro"
         title="Modo oscuro"
+        type="button"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

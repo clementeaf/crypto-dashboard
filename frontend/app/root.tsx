@@ -9,7 +9,7 @@ import {
   useRouteError,
 } from "@remix-run/react";
 import { LinksFunction, MetaFunction } from "@remix-run/node";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useRef } from "react";
 import { AuthProvider } from "~/context/AuthContext";
 
 // Importar CSS como side effect
@@ -35,47 +35,95 @@ export function useTheme() {
   return context;
 }
 
+// Función para obtener el tema del localStorage si existe
+function getStoredTheme(): Theme {
+  if (typeof window === 'undefined') return 'system';
+  
+  return (localStorage.getItem('theme') as Theme) || 'system';
+}
+
+// Función para aplicar el tema al elemento HTML
+function applyTheme(theme: Theme) {
+  if (typeof window === 'undefined') return;
+  
+  console.log("root.tsx: Aplicando tema directamente al DOM:", theme);
+  const html = document.documentElement;
+  
+  if (theme === 'dark') {
+    html.classList.add('dark');
+  } else if (theme === 'light') {
+    html.classList.remove('dark');
+  } else if (theme === 'system') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+    }
+  }
+  
+  // Guardar en localStorage para mantener la consistencia
+  try {
+    localStorage.setItem('theme', theme);
+    console.log("root.tsx: Tema guardado en localStorage:", theme);
+  } catch (e) {
+    console.error("Error al guardar tema en localStorage:", e);
+  }
+}
+
 // Componente proveedor del tema
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('system');
+  const [mounted, setMounted] = useState(false);
+  const initialThemeApplied = useRef(false);
 
-  // Inicializar el tema al cargar el componente
+  // Actualizar el estado con el tema guardado cuando el componente se monta
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    const savedTheme = getStoredTheme();
+    console.log("ThemeProvider: Tema obtenido de localStorage:", savedTheme);
+    setTheme(savedTheme);
+    setMounted(true);
     
-    if (savedTheme) {
-      setTheme(savedTheme);
-    } else {
-      // Detectar preferencia del sistema
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setTheme(prefersDark ? 'dark' : 'light');
+    // Aplicar tema inicial inmediatamente
+    if (!initialThemeApplied.current) {
+      console.log("ThemeProvider: Aplicando tema inicial al DOM:", savedTheme);
+      applyTheme(savedTheme);
+      initialThemeApplied.current = true;
     }
   }, []);
 
+  // Manejador para cambiar el tema
+  const handleSetTheme = (newTheme: Theme) => {
+    console.log("ThemeProvider: Cambiando tema a:", newTheme);
+    
+    // Actualizar estado
+    setTheme(newTheme);
+    
+    // Aplicar al DOM y guardar en localStorage
+    applyTheme(newTheme);
+  };
+
   // Aplicar clases al elemento html cuando cambia el tema
   useEffect(() => {
-    const html = document.documentElement;
+    if (!mounted) return;
     
-    if (theme === 'dark') {
-      html.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else if (theme === 'light') {
-      html.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      // Modo sistema
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (prefersDark) {
-        html.classList.add('dark');
-      } else {
-        html.classList.remove('dark');
+    console.log("ThemeProvider: Tema actualizado en el contexto:", theme);
+    
+    // Manejar cambios en la preferencia del sistema
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      if (theme === 'system') {
+        console.log("ThemeProvider: Detectado cambio en preferencia del sistema");
+        applyTheme('system');
       }
-      localStorage.setItem('theme', 'system');
-    }
-  }, [theme]);
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [theme, mounted]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -104,6 +152,26 @@ export default function App() {
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
+        {/* Script para prevenir parpadeo al cargar la página */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme');
+                  console.log("Script inline: Aplicando tema inicial:", theme);
+                  if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {
+                  console.error("Error en script inline de tema:", e);
+                }
+              })();
+            `,
+          }}
+        />
       </head>
       <body className="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 min-h-screen">
         <AuthProvider>

@@ -6,6 +6,7 @@ import { getCryptocurrencies, clearCache } from "~/services/crypto.service";
 import { testApiConnection } from "~/services/api.config";
 import type { Cryptocurrency } from "~/types/crypto";
 import { useAuth } from "~/context/AuthContext";
+import { useTheme } from "~/root";
 import CryptoCardSkeleton from "~/components/skeleton/CryptoCardSkeleton";
 import ApiDiagnosticsPanel from "~/components/diagnostics/ApiDiagnosticsPanel";
 import RequirementsPanel from "~/components/requirements/RequirementsPanel";
@@ -77,12 +78,51 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   }
 };
 
+// Función para aplicar el tema directamente al DOM
+function applyThemeDirectly(theme: string) {
+  const html = document.documentElement;
+  
+  if (theme === 'dark') {
+    html.classList.add('dark');
+  } else if (theme === 'light') {
+    html.classList.remove('dark');
+  } else if (theme === 'system') {
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (prefersDark) {
+      html.classList.add('dark');
+    } else {
+      html.classList.remove('dark');
+    }
+  }
+}
+
 export default function DashboardRoute() {
   const navigate = useNavigate();
   const { cryptocurrencies, error } = useLoaderData<typeof loader>();
   
   // Usar AuthContext
   const { user, isLoggedIn, logout } = useAuth();
+  
+  // Usar ThemeContext
+  const { theme, setTheme } = useTheme();
+  
+  // Aplicar el tema desde localStorage inmediatamente al montar el componente
+  // Este efecto tiene prioridad y se ejecuta antes que otros
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    console.log("Dashboard: Aplicando tema guardado al cargar:", savedTheme);
+    
+    if (savedTheme) {
+      // Aplicar directamente al DOM para evitar parpadeos
+      applyThemeDirectly(savedTheme);
+      
+      // Sincronizar con el contexto
+      if (savedTheme !== theme) {
+        console.log(`Dashboard: Sincronizando tema de localStorage (${savedTheme}) con contexto (${theme})`);
+        setTheme(savedTheme as 'light' | 'dark' | 'system');
+      }
+    }
+  }, []);  // Solo se ejecuta al montar el componente
   
   // Verificar autenticación del lado del cliente
   useEffect(() => {
@@ -93,6 +133,9 @@ export default function DashboardRoute() {
       return;
     } else {
       console.log("Usuario autenticado:", user);
+      
+      // Verificar si hay un tema guardado específicamente para esta sesión
+      console.log("Verificando tema guardado en dashboard:", localStorage.getItem('theme'));
     }
   }, [isLoggedIn, navigate, user]);
   
@@ -135,9 +178,13 @@ export default function DashboardRoute() {
   // Función para cerrar sesión
   const handleLogout = useCallback(() => {
     logger.info("Usuario cerró sesión", "auth");
+    
+    // Guardar el tema actual antes de cerrar sesión para mantenerlo consistente
+    localStorage.setItem('theme', theme);
+    
     logout();
     navigate("/login");
-  }, [navigate, logout, logger]);
+  }, [navigate, logout, logger, theme]);
   
   // Función para limpiar la caché
   const handleClearCache = useCallback(() => {

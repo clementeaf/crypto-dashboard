@@ -3,6 +3,7 @@ import { Form, useNavigate, useActionData, useSubmit } from "@remix-run/react";
 import type { MetaFunction, ActionFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useAuth } from "~/context/AuthContext";
+import { useTheme } from "~/root";
 import LoadingButton from "~/components/ui/LoadingButton";
 import { login as authLogin, isAuthenticated } from "~/utils/auth";
 
@@ -37,6 +38,7 @@ export default function Login() {
   const [loginSuccess, setLoginSuccess] = useState(false);
   const navigate = useNavigate();
   const { login, isLoggedIn } = useAuth();
+  const { theme } = useTheme();
   const actionData = useActionData<{ success: boolean; error?: string; username?: string; password?: string }>();
   const submit = useSubmit();
 
@@ -46,6 +48,7 @@ export default function Login() {
       // Si el servidor validó las credenciales, login en el cliente y navegar
       setIsLoading(true);
       console.log("Autenticación correcta en el servidor, ejecutando login cliente...");
+      console.log("Tema actual en login durante autenticación:", theme);
       
       // Ejecutar login en el cliente (esto actualizará sessionStorage)
       if (actionData.username && actionData.password) {
@@ -56,6 +59,8 @@ export default function Login() {
             setLoginSuccess(true);
             // Redirigir después de un breve retraso para mostrar el mensaje
             setTimeout(() => {
+              // Guardamos explícitamente el tema actual antes de navegar
+              localStorage.setItem('theme', theme);
               navigate("/dashboard", { replace: true });
             }, 1000);
           } else {
@@ -68,15 +73,17 @@ export default function Login() {
       console.log("Credenciales incorrectas");
       setIsLoading(false);
     }
-  }, [actionData, login, navigate]);
+  }, [actionData, login, navigate, theme]);
 
   // Verificar si ya estamos autenticados y redirigir directamente sin mostrar modal
   useEffect(() => {
     if (isLoggedIn) {
       console.log("Usuario ya autenticado, redirigiendo a dashboard");
+      // Guardamos explícitamente el tema actual antes de navegar
+      localStorage.setItem('theme', theme);
       navigate("/dashboard", { replace: true });
     }
-  }, [isLoggedIn, navigate]);
+  }, [isLoggedIn, navigate, theme]);
 
   // Manejador para formulario directo (fallback si el Form de Remix no funciona)
   const handleSubmit = async (e: React.FormEvent) => {
@@ -86,6 +93,7 @@ export default function Login() {
     // Intentar login directo
     try {
       console.log("Intentando login directo");
+      console.log("Tema actual en login durante envío de formulario:", theme);
       const success = await login(username, password);
       
       if (success) {
@@ -94,6 +102,8 @@ export default function Login() {
         setLoginSuccess(true);
         // Redirigir después de un breve retraso para mostrar el mensaje
         setTimeout(() => {
+          // Guardamos explícitamente el tema actual antes de navegar
+          localStorage.setItem('theme', theme);
           navigate("/dashboard", { replace: true });
         }, 1000);
       } else {
