@@ -43,6 +43,7 @@ export default function Dashboard({
   const [cryptos, setCryptos] = useState<Cryptocurrency[]>(cryptocurrencies);
   const [filteredCryptos, setFilteredCryptos] = useState<Cryptocurrency[]>(cryptocurrencies);
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+  const [showStats, setShowStats] = useState(false);
   
   // Sincronizar el estado local con el prop
   useEffect(() => {
@@ -216,134 +217,209 @@ export default function Dashboard({
   };
   
   return (
-    <div className="max-w-7xl mx-auto">
-      <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-4 border-b border-gray-200 dark:border-gray-700">
-        <div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+      {/* Barra de navegación superior con efecto de vidrio */}
+      <nav className="sticky top-0 z-50 backdrop-blur-md bg-gray-900/70 border-b border-gray-700 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
-            
-            {/* Información del usuario y botón de logout */}
-            {onLogout && (
-              <div className="flex items-center">
-                <span className="text-sm text-gray-600 dark:text-gray-400 mr-3">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
+                  {title}
+                </span>
+              </div>
+              <div className="ml-2 px-2 py-1 rounded-full bg-blue-900/30 border border-blue-700/50 flex items-center">
+                <span className="text-xs text-blue-300">
                   {username}
                 </span>
-                <LoadingButton
-                  onClick={onLogout}
-                  variant="danger"
-                  size="sm"
-                >
-                  Cerrar sesión
-                </LoadingButton>
               </div>
-            )}
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <div className="text-sm text-gray-400">
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Actualizando...</span>
+                  </div>
+                ) : lastUpdated ? (
+                  <span>Actualizado: {lastUpdated}</span>
+                ) : null}
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <div className="bg-gray-800/60 rounded-lg p-1 border border-gray-700">
+                  <ThemeToggle />
+                </div>
+                
+                {onToggleAutoRefresh && (
+                  <div className="bg-gray-800/60 rounded-lg p-1 border border-gray-700">
+                    <AutoRefreshControl
+                      autoRefresh={autoRefresh}
+                      refreshInterval={refreshInterval}
+                      onToggleAutoRefresh={handleToggleAutoRefresh}
+                      onChangeInterval={handleChangeInterval}
+                      disabled={isLoading}
+                    />
+                  </div>
+                )}
+                
+                <button
+                  onClick={handleRefresh}
+                  disabled={isLoading}
+                  className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoading ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span>Actualizando...</span>
+                    </>
+                  ) : (
+                    <>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
+                      <span>Actualizar</span>
+                    </>
+                  )}
+                </button>
+                
+                {onLogout && (
+                  <button
+                    onClick={onLogout}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all shadow-lg"
+                  >
+                    Cerrar sesión
+                  </button>
+                )}
+              </div>
+            </div>
           </div>
-          
-          <p className="text-gray-500 dark:text-gray-400 mt-1">
-            {isLoading ? 'Actualizando datos...' : 
-              lastUpdated ? `Última actualización: ${lastUpdated}` : 
-              'Monitor top cryptocurrencies in real-time'}
-          </p>
         </div>
-        
-        <div className="flex flex-wrap items-center gap-3">
-          <div>
-            <ThemeToggle />
-          </div>
-          
-          {onToggleAutoRefresh && (
-            <AutoRefreshControl
-              autoRefresh={autoRefresh}
-              refreshInterval={refreshInterval}
-              onToggleAutoRefresh={handleToggleAutoRefresh}
-              onChangeInterval={handleChangeInterval}
-              disabled={isLoading}
-            />
-          )}
-          
-          <LoadingButton 
-            onClick={handleRefresh}
-            isLoading={isLoading}
-            disabled={isLoading}
-            variant="primary"
-            size="sm"
-            loadingText="Actualizando..."
-          >
-            Actualizar datos
-          </LoadingButton>
-        </div>
-      </header>
+      </nav>
       
-      <div className="w-full max-w-md mb-6">
-        <SearchFilter 
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          isLoading={isLoading}
-        />
-      </div>
-      
-      {apiError && (
-        <div className="bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 rounded-lg p-4 mb-6 border border-red-200 dark:border-red-800/30">
-          <p className="font-medium">{apiError}</p>
-          <p className="text-sm">Los datos mostrados son aproximados. Intente actualizando nuevamente en unos minutos.</p>
-        </div>
-      )}
-      
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Criptomonedas</h2>
-        <div className="flex items-center gap-2">
-          <div className="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
-            {filteredCryptos.length} de {cryptocurrencies.length}
-          </div>
-          
-          {filteredCryptos.length === 0 && searchTerm.trim() !== '' && (
-            <span className="text-sm text-orange-500 dark:text-orange-400">
-              No se encontraron resultados
-            </span>
-          )}
-        </div>
-      </div>
-      
-      {isLoading && filteredCryptos.length === 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div 
-              key={index} 
-              className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden h-64 animate-pulse"
-            >
-              <div className="p-5 space-y-4">
-                <div className="flex items-center space-x-4">
-                  <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                  <div className="flex-1 space-y-2">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-4/5"></div>
-                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-3/5"></div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Panel de bienvenida con stats generales */}
+        <div className="mb-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700/50 overflow-hidden">
+          <div className="p-6">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <h2 className="text-3xl font-bold text-gray-100">Bienvenido al Dashboard</h2>
+                <p className="mt-2 text-gray-400">
+                  Visualiza y analiza las principales criptomonedas en tiempo real
+                </p>
+                
+                {/* Stats flexibles */}
+                <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+                    <div className="text-sm text-gray-400">Total Monedas</div>
+                    <div className="text-2xl font-bold text-white">{cryptocurrencies.length}</div>
+                  </div>
+                  
+                  <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+                    <div className="text-sm text-gray-400">Monitoreadas</div>
+                    <div className="text-2xl font-bold text-white">{filteredCryptos.length}</div>
+                  </div>
+                  
+                  <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+                    <div className="text-sm text-gray-400">Auto-refresh</div>
+                    <div className="text-2xl font-bold text-white">{autoRefresh ? 'Activado' : 'Desactivado'}</div>
+                  </div>
+                  
+                  <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50">
+                    <div className="text-sm text-gray-400">Intervalo</div>
+                    <div className="text-2xl font-bold text-white">{refreshInterval}s</div>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
-                </div>
-                <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
-                    </div>
-                  </div>
+              </div>
+              
+              <div className="shrink-0 w-full md:w-1/3 xl:w-1/4">
+                <div className="bg-gray-800/50 rounded-xl p-4 border border-gray-700/50 shadow-inner">
+                  <SearchFilter 
+                    searchTerm={searchTerm}
+                    setSearchTerm={setSearchTerm}
+                    isLoading={isLoading}
+                    placeholder="Buscar criptomoneda..."
+                    darkMode={true}
+                  />
                 </div>
               </div>
             </div>
-          ))}
+          </div>
         </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredCryptos.map((crypto, index) => {
-            // Solo paso drag events al contenedor, no al CryptoCard
-            return (
+        
+        {/* Mensajes de error */}
+        {apiError && (
+          <div className="mb-6 bg-red-900/20 backdrop-blur-sm rounded-xl p-4 border border-red-500/30">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-300">{apiError}</h3>
+                <div className="mt-1 text-xs text-red-300/80">
+                  Los datos mostrados pueden no ser precisos. Intente actualizar en unos minutos.
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Grid de criptomonedas con efecto de cristal */}
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold text-white">Criptomonedas</h2>
+          
+          <div className="flex items-center gap-2">
+            {filteredCryptos.length === 0 && searchTerm.trim() !== '' && (
+              <span className="text-sm text-yellow-400">
+                No se encontraron resultados
+              </span>
+            )}
+          </div>
+        </div>
+        
+        {isLoading && filteredCryptos.length === 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div 
+                key={index} 
+                className="relative bg-gradient-to-br from-gray-800/70 to-gray-900/70 backdrop-blur-md rounded-xl border border-gray-700/50 shadow-lg overflow-hidden h-64 animate-pulse"
+              >
+                <div className="p-5 space-y-4">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 bg-gray-700/50 rounded-full"></div>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-4 bg-gray-700/50 rounded w-4/5"></div>
+                      <div className="h-3 bg-gray-700/50 rounded w-3/5"></div>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="h-8 bg-gray-700/50 rounded"></div>
+                    <div className="h-4 bg-gray-700/50 rounded"></div>
+                  </div>
+                  <div className="pt-4 border-t border-gray-700/30">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <div className="h-3 bg-gray-700/50 rounded w-1/2"></div>
+                        <div className="h-4 bg-gray-700/50 rounded w-3/4"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {filteredCryptos.map((crypto, index) => (
               <div
                 key={crypto.id}
                 draggable
@@ -351,19 +427,68 @@ export default function Dashboard({
                 onDragEnter={() => handleDragEnter(index)}
                 onDragEnd={handleDragEnd}
                 onDragOver={handleDragOver}
-                className={`transition-transform ${
-                  index === draggedItemIndex ? 'opacity-50' : 'opacity-100'
+                className={`transition-all duration-300 transform hover:-translate-y-1 ${
+                  index === draggedItemIndex ? 'opacity-50 scale-105' : 'opacity-100'
                 }`}
               >
-                <CryptoCard 
-                  crypto={crypto} 
-                  index={index}
-                />
+                <div className="relative bg-gradient-to-br from-gray-800/70 to-gray-900/70 backdrop-blur-md rounded-xl border border-gray-700/50 shadow-lg overflow-hidden hover:shadow-indigo-500/10">
+                  <div className="absolute top-0 left-0 w-full h-1">
+                    <div className="h-full bg-gradient-to-r from-blue-500 to-purple-600"></div>
+                  </div>
+                  <div className="p-5">
+                    <div className="flex items-center mb-4">
+                      <div className="mr-3">
+                        <img src={crypto.image} alt={crypto.symbol} className="w-10 h-10 rounded-full" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold text-white">{crypto.name}</h3>
+                        <span className="text-gray-400">{crypto.symbol.toUpperCase()}</span>
+                      </div>
+                      <div className="ml-auto">
+                        <span className="bg-gray-800 text-gray-300 text-xs font-semibold px-2.5 py-1 rounded-full border border-gray-700">
+                          #{index + 1}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <h4 className="text-2xl font-bold text-white">
+                        ${crypto.current_price.usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </h4>
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-700/30">
+                      <div className="grid grid-cols-1 gap-y-3">
+                        <div>
+                          <div className="text-sm text-gray-400">
+                            Precio (BTC)
+                          </div>
+                          <div className="font-medium text-gray-300">
+                            {crypto.current_price.btc.toLocaleString(undefined, { 
+                              minimumFractionDigits: crypto.current_price.btc < 0.001 ? 8 : 6, 
+                              maximumFractionDigits: crypto.current_price.btc < 0.001 ? 8 : 6
+                            })} BTC
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
+        )}
+      </main>
+      
+      {/* Footer con efectos de vidrio */}
+      <footer className="bg-gray-900/70 backdrop-blur-md border-t border-gray-800 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+          <div className="text-center text-gray-400 text-sm">
+            <p>Crypto Dashboard — Arrastra las tarjetas para reorganizarlas</p>
+            <p className="mt-1">Última actualización: {lastUpdated}</p>
+          </div>
         </div>
-      )}
+      </footer>
     </div>
   );
 } 

@@ -4,9 +4,17 @@ interface SearchFilterProps {
   searchTerm: string;
   setSearchTerm: (term: string) => void;
   isLoading?: boolean;
+  placeholder?: string;
+  darkMode?: boolean;
 }
 
-export default function SearchFilter({ searchTerm, setSearchTerm, isLoading = false }: SearchFilterProps) {
+export default function SearchFilter({ 
+  searchTerm, 
+  setSearchTerm, 
+  isLoading = false,
+  placeholder = "Search cryptocurrency by name or symbol...",
+  darkMode = false
+}: SearchFilterProps) {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
@@ -21,7 +29,7 @@ export default function SearchFilter({ searchTerm, setSearchTerm, isLoading = fa
     <div className={`grok-search relative transition-all duration-200 ${isFocused ? 'ring-2 ring-primary/40 scale-[1.01]' : ''}`}>
       <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
         <svg 
-          className="w-5 h-5 text-muted-foreground" 
+          className={`w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-muted-foreground'}`}
           xmlns="http://www.w3.org/2000/svg" 
           fill="none" 
           viewBox="0 0 24 24" 
@@ -39,8 +47,12 @@ export default function SearchFilter({ searchTerm, setSearchTerm, isLoading = fa
       <input
         ref={inputRef}
         type="text"
-        className="input w-full py-3 pl-12 pr-12"
-        placeholder="Search cryptocurrency by name or symbol..."
+        className={`${
+          darkMode 
+            ? 'bg-gray-800/70 border-gray-700 text-white placeholder:text-gray-500 focus:ring-blue-500 focus:border-blue-500' 
+            : 'input'
+        } w-full py-3 pl-12 pr-12 rounded-lg border focus:outline-none focus:ring-2 transition-all`}
+        placeholder={placeholder}
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
         onFocus={() => setIsFocused(true)}
@@ -50,7 +62,11 @@ export default function SearchFilter({ searchTerm, setSearchTerm, isLoading = fa
       
       {searchTerm ? (
         <button 
-          className="absolute inset-y-0 right-0 flex items-center pr-4 text-muted-foreground hover:text-foreground transition-colors"
+          className={`absolute inset-y-0 right-0 flex items-center pr-4 ${
+            darkMode 
+              ? 'text-gray-400 hover:text-gray-300' 
+              : 'text-muted-foreground hover:text-foreground'
+          } transition-colors`}
           onClick={() => setSearchTerm('')}
           aria-label="Clear search"
           title="Clear search"
@@ -72,7 +88,11 @@ export default function SearchFilter({ searchTerm, setSearchTerm, isLoading = fa
         </button>
       ) : isLoading ? (
         <div className="absolute inset-y-0 right-0 flex items-center pr-4">
-          <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+          <div className={`w-5 h-5 border-2 ${
+            darkMode 
+              ? 'border-blue-700/30 border-t-blue-500' 
+              : 'border-primary/30 border-t-primary'
+          } rounded-full animate-spin`}></div>
         </div>
       ) : null}
     </div>
