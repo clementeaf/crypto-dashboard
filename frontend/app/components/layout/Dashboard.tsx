@@ -251,7 +251,7 @@ export default function Dashboard({
               </div>
               
               <div className="flex items-center space-x-2">
-                <div className="bg-gray-800/60 rounded-lg p-1 border border-gray-700">
+                <div className="bg-gray-800/60 rounded-lg p-2 border border-gray-700 w-[180px]">
                   <ThemeToggle />
                 </div>
                 

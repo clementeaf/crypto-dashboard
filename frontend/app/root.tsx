@@ -9,121 +9,72 @@ import {
   useRouteError,
 } from "@remix-run/react";
 import { LinksFunction, MetaFunction } from "@remix-run/node";
-import { createContext, useContext, useState, useEffect, useRef } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { AuthProvider } from "~/context/AuthContext";
 
 // Importar CSS como side effect
 import "./tailwind.css";
 
-// Definir tipos para el tema
-type Theme = 'light' | 'dark' | 'system';
-
+// Tema simple - solo necesitamos true/false para dark mode
 type ThemeContextType = {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
+  isDark: boolean;
+  toggleTheme: () => void;
 };
 
-// Crear el contexto de tema
-export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+// Crear contexto simple de tema
+export const ThemeContext = createContext<ThemeContextType>({
+  isDark: true,
+  toggleTheme: () => {},
+});
 
-// Hook para usar el contexto de tema
+// Hook simple para usar el tema
 export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (context === undefined) {
-    throw new Error('useTheme debe ser usado dentro de un ThemeProvider');
-  }
-  return context;
+  return useContext(ThemeContext);
 }
 
-// Función para obtener el tema del localStorage si existe
-function getStoredTheme(): Theme {
-  if (typeof window === 'undefined') return 'system';
-  
-  return (localStorage.getItem('theme') as Theme) || 'system';
-}
-
-// Función para aplicar el tema al elemento HTML
-function applyTheme(theme: Theme) {
-  if (typeof window === 'undefined') return;
-  
-  console.log("root.tsx: Aplicando tema directamente al DOM:", theme);
-  const html = document.documentElement;
-  
-  if (theme === 'dark') {
-    html.classList.add('dark');
-  } else if (theme === 'light') {
-    html.classList.remove('dark');
-  } else if (theme === 'system') {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    if (prefersDark) {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
-  }
-  
-  // Guardar en localStorage para mantener la consistencia
-  try {
-    localStorage.setItem('theme', theme);
-    console.log("root.tsx: Tema guardado en localStorage:", theme);
-  } catch (e) {
-    console.error("Error al guardar tema en localStorage:", e);
-  }
-}
-
-// Componente proveedor del tema
+// Proveedor simple de tema
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('system');
-  const [mounted, setMounted] = useState(false);
-  const initialThemeApplied = useRef(false);
-
-  // Actualizar el estado con el tema guardado cuando el componente se monta
-  useEffect(() => {
-    const savedTheme = getStoredTheme();
-    console.log("ThemeProvider: Tema obtenido de localStorage:", savedTheme);
-    setTheme(savedTheme);
-    setMounted(true);
+  const [isDark, setIsDark] = useState(true);
+  
+  // Toggle simple entre claro/oscuro
+  const toggleTheme = () => {
+    const newIsDark = !isDark;
+    setIsDark(newIsDark);
     
-    // Aplicar tema inicial inmediatamente
-    if (!initialThemeApplied.current) {
-      console.log("ThemeProvider: Aplicando tema inicial al DOM:", savedTheme);
-      applyTheme(savedTheme);
-      initialThemeApplied.current = true;
+    // Aplicar cambio directamente al HTML
+    if (newIsDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    
+    // Guardar en localStorage
+    localStorage.setItem('isDark', String(newIsDark));
+  };
+  
+  // Cargar preferencia al inicio
+  useEffect(() => {
+    const savedIsDark = localStorage.getItem('isDark');
+    
+    // Si hay una preferencia guardada, usarla
+    if (savedIsDark !== null) {
+      const parsedIsDark = savedIsDark === 'true';
+      setIsDark(parsedIsDark);
+      
+      // Aplicar tema guardado
+      if (parsedIsDark) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    } else {
+      // Por defecto, usar tema oscuro
+      document.documentElement.classList.add('dark');
     }
   }, []);
-
-  // Manejador para cambiar el tema
-  const handleSetTheme = (newTheme: Theme) => {
-    console.log("ThemeProvider: Cambiando tema a:", newTheme);
-    
-    // Actualizar estado
-    setTheme(newTheme);
-    
-    // Aplicar al DOM y guardar en localStorage
-    applyTheme(newTheme);
-  };
-
-  // Aplicar clases al elemento html cuando cambia el tema
-  useEffect(() => {
-    if (!mounted) return;
-    
-    console.log("ThemeProvider: Tema actualizado en el contexto:", theme);
-    
-    // Manejar cambios en la preferencia del sistema
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      if (theme === 'system') {
-        console.log("ThemeProvider: Detectado cambio en preferencia del sistema");
-        applyTheme('system');
-      }
-    };
-    
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, [theme, mounted]);
-
+  
   return (
-    <ThemeContext.Provider value={{ theme, setTheme: handleSetTheme }}>
+    <ThemeContext.Provider value={{ isDark, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -152,22 +103,19 @@ export default function App() {
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
-        {/* Script para prevenir parpadeo al cargar la página */}
+        {/* Script para prevenir parpadeo */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
-                  var theme = localStorage.getItem('theme');
-                  console.log("Script inline: Aplicando tema inicial:", theme);
-                  if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  var isDark = localStorage.getItem('isDark');
+                  if (isDark === 'true' || isDark === null) {
                     document.documentElement.classList.add('dark');
                   } else {
                     document.documentElement.classList.remove('dark');
                   }
-                } catch (e) {
-                  console.error("Error en script inline de tema:", e);
-                }
+                } catch (e) {}
               })();
             `,
           }}
