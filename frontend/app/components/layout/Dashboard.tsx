@@ -234,11 +234,6 @@ export default function Dashboard({
                   {title}
                 </span>
               </div>
-              <div className="ml-2 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center">
-                <span className="text-xs text-gray-600 dark:text-gray-300">
-                  {username}
-                </span>
-              </div>
             </div>
             
             {/* Botón de menú móvil */}
@@ -260,36 +255,10 @@ export default function Dashboard({
             
             {/* Menú escritorio */}
             <div className="hidden md:flex items-center space-x-4">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                {isLoading ? (
-                  <div className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Actualizando...</span>
-                  </div>
-                ) : lastUpdated ? (
-                  <span>Actualizado: {lastUpdated}</span>
-                ) : null}
-              </div>
-              
               <div className="flex items-center space-x-2">
                 <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-2 border border-gray-200 dark:border-gray-700">
                   <ThemeToggle />
                 </div>
-                
-                {onToggleAutoRefresh && (
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
-                    <AutoRefreshControl
-                      autoRefresh={autoRefresh}
-                      refreshInterval={refreshInterval}
-                      onToggleAutoRefresh={handleToggleAutoRefresh}
-                      onChangeInterval={handleChangeInterval}
-                      disabled={isLoading}
-                    />
-                  </div>
-                )}
                 
                 <button
                   onClick={handleRefresh}
@@ -330,38 +299,12 @@ export default function Dashboard({
           {mobileMenuOpen && (
             <div className="md:hidden mt-4 space-y-3 pb-3 border-t border-gray-200 dark:border-gray-700 pt-3">
               <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  {isLoading ? (
-                    <div className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Actualizando...</span>
-                    </div>
-                  ) : lastUpdated ? (
-                    <span>Actualizado: {lastUpdated}</span>
-                  ) : null}
-                </div>
-                
                 <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-2 border border-gray-200 dark:border-gray-700">
                   <ThemeToggle />
                 </div>
               </div>
               
               <div className="flex flex-wrap gap-2">
-                {onToggleAutoRefresh && (
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700 w-full">
-                    <AutoRefreshControl
-                      autoRefresh={autoRefresh}
-                      refreshInterval={refreshInterval}
-                      onToggleAutoRefresh={handleToggleAutoRefresh}
-                      onChangeInterval={handleChangeInterval}
-                      disabled={isLoading}
-                    />
-                  </div>
-                )}
-                
                 <button
                   onClick={handleRefresh}
                   disabled={isLoading}
@@ -403,10 +346,46 @@ export default function Dashboard({
         {/* Panel de bienvenida con stats generales */}
         <div className="mb-6 sm:mb-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
           <div className="p-4 sm:p-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
+            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-6">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">Bienvenido al Dashboard</h2>
-                <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                <div className="flex items-center mb-2">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">Bienvenido al Dashboard</h2>
+                  <div className="ml-3 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center">
+                    <span className="text-xs text-gray-600 dark:text-gray-300">
+                      {username}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="flex flex-wrap items-center gap-3 mb-3">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">
+                    {isLoading ? (
+                      <div className="flex items-center">
+                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Actualizando...</span>
+                      </div>
+                    ) : lastUpdated ? (
+                      <span>Actualizado: {lastUpdated}</span>
+                    ) : null}
+                  </div>
+                  
+                  {onToggleAutoRefresh && (
+                    <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
+                      <AutoRefreshControl
+                        autoRefresh={autoRefresh}
+                        refreshInterval={refreshInterval}
+                        onToggleAutoRefresh={handleToggleAutoRefresh}
+                        onChangeInterval={handleChangeInterval}
+                        disabled={isLoading}
+                      />
+                    </div>
+                  )}
+                </div>
+                
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Visualiza y analiza las principales criptomonedas en tiempo real
                 </p>
                 
