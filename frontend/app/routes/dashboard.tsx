@@ -1,12 +1,10 @@
 import { json, type LoaderFunctionArgs, type MetaFunction } from "@remix-run/node";
 import { useLoaderData, useNavigate, useRevalidator } from "@remix-run/react";
-import { useCallback, useState, useEffect, useRef } from "react";
+import { useCallback, useState, useEffect, useRef, useMemo } from "react";
 import Dashboard from "~/components/layout/Dashboard";
-import { getCryptocurrencies, clearCache } from "~/services/crypto.service";
-import { testApiConnection } from "~/services/api.config";
+import { getCryptocurrencies } from "~/services/crypto.service";
 import type { Cryptocurrency } from "~/types/crypto";
 import { useAuth } from "~/context/AuthContext";
-import { useTheme } from "~/root";
 import { useLogger } from "~/hooks/useLogger";
 
 export const meta: MetaFunction = () => {
@@ -79,9 +77,6 @@ export default function DashboardRoute() {
   // Usar AuthContext
   const { user, isLoggedIn, logout } = useAuth();
   
-  // Usar ThemeContext
-  const { isDark } = useTheme();
-  
   // Inicializar logger
   const logger = useLogger({
     maxLogs: 100,
@@ -91,20 +86,6 @@ export default function DashboardRoute() {
   
   // Revalidator para actualizar los datos
   const revalidator = useRevalidator();
-  
-  // Estado para controles de UI
-  const [showLogs, setShowLogs] = useState(false);
-  const [apiTestResult, setApiTestResult] = useState<{
-    success?: boolean;
-    data?: any;
-    error?: string;
-    statusCode?: number;
-    responseTime?: number;
-    timestamp?: string;
-  } | null>(null);
-  const [isTestingApi, setIsTestingApi] = useState(false);
-  const [isClearingCache, setIsClearingCache] = useState(false);
-  const [showRequirements, setShowRequirements] = useState(false);
   
   // Estado para la actualización automática
   const [autoRefresh, setAutoRefresh] = useState(false);
@@ -116,54 +97,25 @@ export default function DashboardRoute() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const loggerRef = useRef(logger);
   
-  // Callbacks - IMPORTANTE: Declarar TODOS los useCallback antes de cualquier useEffect
+  // Actualizar la referencia del logger cuando cambie
+  useEffect(() => {
+    loggerRef.current = logger;
+  }, [logger]);
+  
+  // Verificar autenticación del lado del cliente - mayor prioridad
+  useEffect(() => {
+    if (!isLoggedIn) {
+      loggerRef.current.info("Redirigiendo a login por falta de autenticación", "auth");
+      navigate("/login", { replace: true });
+    }
+  }, [isLoggedIn, navigate]);
+  
   // Función para cerrar sesión
   const handleLogout = useCallback(() => {
     loggerRef.current.info("Usuario cerró sesión", "auth");
     logout();
     navigate("/login");
   }, [navigate, logout]);
-  
-  // Función para limpiar la caché
-  const handleClearCache = useCallback(() => {
-    setIsClearingCache(true);
-    loggerRef.current.info('Limpiando caché...', 'cache');
-    
-    try {
-      clearCache();
-      loggerRef.current.info('Caché limpiada correctamente', 'cache');
-    } catch (error) {
-      loggerRef.current.error(`Error al limpiar la caché: ${error}`, 'cache');
-    } finally {
-      setIsClearingCache(false);
-    }
-  }, []);
-  
-  // Función para probar la API
-  const handleTestApi = useCallback(async () => {
-    setIsTestingApi(true);
-    loggerRef.current.info('Iniciando prueba de conexión con la API...', 'api');
-    
-    try {
-      const result = await testApiConnection();
-      loggerRef.current.info('Resultado de la prueba de conexión:', 'api');
-      
-      setApiTestResult({
-        ...result,
-        timestamp: new Date().toLocaleTimeString()
-      });
-    } catch (err) {
-      loggerRef.current.error(`Error al ejecutar la prueba de conexión: ${err}`, 'api');
-      
-      setApiTestResult({
-        success: false,
-        error: err instanceof Error ? err.message : 'Error desconocido',
-        timestamp: new Date().toLocaleTimeString()
-      });
-    } finally {
-      setIsTestingApi(false);
-    }
-  }, []);
   
   // Toggle para actualización automática
   const handleToggleAutoRefresh = useCallback(() => {
@@ -189,28 +141,14 @@ export default function DashboardRoute() {
     setLastUpdated(new Date().toLocaleTimeString());
   }, [revalidator]);
   
-  // Actualizar la referencia del logger cuando cambie
-  useEffect(() => {
-    loggerRef.current = logger;
-  }, [logger]);
-
-  // Verificar autenticación del lado del cliente
-  useEffect(() => {
-    if (!isLoggedIn) {
-      console.log("Usuario no autenticado, redirigiendo a login");
-      navigate("/login", { replace: true });
-    } else {
-      console.log("Usuario autenticado:", user);
-    }
-  }, [isLoggedIn, navigate, user]);
-  
   // Manejar errores de revalidación
   useEffect(() => {
+    // Solo procesar el error si estamos en estado 'idle' y hay un error
     if (revalidator.state === 'idle' && error) {
       loggerRef.current.error(`Error en revalidación: ${error}`, 'api');
       
-      // Mostrar mensaje de error personalizado
-      if (error.includes('timeout') || error.includes('aborted')) {
+      // Manejar diferentes tipos de errores
+      if (typeof error === 'string' && (error.includes('timeout') || error.includes('aborted'))) {
         setApiErrorMessage('La conexión con la API está tardando demasiado tiempo. Mostraremos datos de ejemplo mientras tanto.');
       } else {
         setApiErrorMessage(error);
@@ -225,13 +163,13 @@ export default function DashboardRoute() {
   
   // Efecto para manejar la actualización automática
   useEffect(() => {
-    // Limpiar cualquier intervalo existente
+    // Limpiar cualquier intervalo existente primero
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
     }
     
-    // Si autoRefresh está habilitado, configurar el intervalo
+    // Solo configurar un nuevo intervalo si autoRefresh está habilitado
     if (autoRefresh) {
       loggerRef.current.info(`[AUTO] Configurando actualización automática cada ${refreshInterval} segundos`, 'refresh');
       intervalRef.current = setInterval(() => {
@@ -240,7 +178,7 @@ export default function DashboardRoute() {
       }, refreshInterval * 1000);
     }
     
-    // Limpiar el intervalo cuando el componente se desmonte
+    // Limpiar el intervalo cuando el componente se desmonte o las dependencias cambien
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -249,15 +187,21 @@ export default function DashboardRoute() {
     };
   }, [autoRefresh, refreshInterval, handleRefresh]);
 
-  // Si no está autenticado, no renderizar nada mientras redirige
+  // Memoizar el nombre de usuario
+  const username = useMemo(() => {
+    return user?.username || 'Usuario';
+  }, [user]);
+
+  // Si no está autenticado, mostrar un placeholder mientras redirige
   if (!isLoggedIn) {
-    return <div className="bg-gray-100 dark:bg-gray-900 min-h-screen"></div>;
+    return <div className="bg-gray-100 dark:bg-gray-900 min-h-screen" aria-label="Redirigiendo a la página de login"></div>;
   }
 
+  // Memoizar las props para el componente Dashboard para evitar re-renderizados innecesarios
   return (
     <Dashboard 
       title="Dashboard de Criptomonedas"
-      username={user?.username || 'Usuario'}
+      username={username}
       onLogout={handleLogout}
       lastUpdated={lastUpdated}
       onRefresh={handleRefresh}

@@ -1,5 +1,5 @@
 import { useNavigate, useRouteError, isRouteErrorResponse } from "@remix-run/react";
-import { useEffect } from "react";
+import { useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "~/context/AuthContext";
 import LoadingButton from "~/components/ui/LoadingButton";
 
@@ -8,15 +8,20 @@ export default function DashboardError() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
   
-  let message = "Ha ocurrido un error al cargar el dashboard.";
-  let status = 500;
-
-  if (isRouteErrorResponse(error)) {
-    message = error.data.message || error.data;
-    status = error.status;
-  } else if (error instanceof Error) {
-    message = error.message;
-  }
+  // Memoizar el procesamiento del error para evitar cálculos innecesarios
+  const { message, status } = useMemo(() => {
+    let message = "Ha ocurrido un error al cargar el dashboard.";
+    let status = 500;
+  
+    if (isRouteErrorResponse(error)) {
+      message = error.data.message || error.data;
+      status = error.status;
+    } else if (error instanceof Error) {
+      message = error.message;
+    }
+    
+    return { message, status };
+  }, [error]);
 
   // Redirigir a login si no está autenticado
   useEffect(() => {
@@ -25,16 +30,22 @@ export default function DashboardError() {
     }
   }, [isLoggedIn, navigate]);
 
-  const handleTryAgain = () => {
+  // Memoizar funciones de navegación para estabilidad
+  const handleTryAgain = useCallback(() => {
     navigate("/dashboard");
-  };
+  }, [navigate]);
 
-  const handleGoHome = () => {
+  const handleGoHome = useCallback(() => {
     navigate("/");
-  };
+  }, [navigate]);
+
+  // Si no está autenticado, no renderizar el componente completo
+  if (!isLoggedIn) {
+    return null;
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 p-4" role="alert" aria-live="assertive">
       <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-md w-full">
         <div className="text-center">
           <svg 
@@ -43,6 +54,7 @@ export default function DashboardError() {
             stroke="currentColor" 
             viewBox="0 0 24 24" 
             xmlns="http://www.w3.org/2000/svg"
+            aria-hidden="true"
           >
             <path 
               strokeLinecap="round" 
@@ -60,6 +72,7 @@ export default function DashboardError() {
               onClick={handleTryAgain}
               variant="primary"
               size="md"
+              aria-label="Intentar cargar el dashboard nuevamente"
             >
               Intentar de nuevo
             </LoadingButton>
@@ -68,6 +81,7 @@ export default function DashboardError() {
               onClick={handleGoHome}
               variant="secondary"
               size="md"
+              aria-label="Regresar a la página principal"
             >
               Volver al inicio
             </LoadingButton>

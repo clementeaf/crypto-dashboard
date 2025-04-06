@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useActionData } from "@remix-run/react";
 import type { MetaFunction, ActionFunction } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { useAuth } from "~/context/AuthContext";
-import { useTheme } from "~/root";
 import LoadingButton from "~/components/ui/LoadingButton";
 import { LoginActionData } from "~/types/auth.types";
 
@@ -38,74 +37,55 @@ export default function Login() {
   const [loginSuccess, setLoginSuccess] = useState(false);
   const navigate = useNavigate();
   const { login, isLoggedIn } = useAuth();
-  const { isDark } = useTheme();
   const actionData = useActionData<LoginActionData>();
+
+  // Redirect to dashboard after successful login
+  const redirectToDashboard = useCallback(() => {
+    setLoginSuccess(true);
+    // Redirect after a brief delay to show the message
+    setTimeout(() => {
+      navigate("/dashboard", { replace: true });
+    }, 1000);
+  }, [navigate]);
+
+  // Handle login logic
+  const performLogin = useCallback(async (user: string, pass: string) => {
+    setIsLoading(true);
+    
+    try {
+      const success = await login(user, pass);
+      
+      if (success) {
+        redirectToDashboard();
+      } else {
+        setIsLoading(false);
+      }
+    } catch (error) {
+      setIsLoading(false);
+    }
+  }, [login, redirectToDashboard]);
 
   // Process server action result
   useEffect(() => {
-    if (actionData?.success) {
-      // If the server validated the credentials, login on the client and navigate
-      setIsLoading(true);
-      console.log("Correct authentication on the server, executing client login...");
-      
-      // Execute login on the client (this will update sessionStorage)
-      if (actionData.username && actionData.password) {
-        login(actionData.username, actionData.password).then(success => {
-          if (success) {
-            console.log("Successful client login, navigating to dashboard...");
-            // Show success message
-            setLoginSuccess(true);
-            // Redirect after a brief delay to show the message
-            setTimeout(() => {
-              navigate("/dashboard", { replace: true });
-            }, 1000);
-          } else {
-            console.error("Error executing login on client");
-            setIsLoading(false);
-          }
-        });
-      }
+    if (actionData?.success && actionData.username && actionData.password) {
+      performLogin(actionData.username, actionData.password);
     } else if (actionData && !actionData.success) {
-      console.log("Incorrect credentials");
       setIsLoading(false);
     }
-  }, [actionData, login, navigate]);
+  }, [actionData, performLogin]);
 
-  // Check if we're already authenticated and redirect directly without showing modal
+  // Check if we're already authenticated and redirect directly
   useEffect(() => {
     if (isLoggedIn) {
-      console.log("User already authenticated, redirecting to dashboard");
       navigate("/dashboard", { replace: true });
     }
   }, [isLoggedIn, navigate]);
 
-  // Handler for direct form (fallback if Remix Form doesn't work)
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Handler for direct form submission (fallback if Remix Form doesn't work)
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    // Try direct login
-    try {
-      console.log("Attempting direct login");
-      const success = await login(username, password);
-      
-      if (success) {
-        console.log("Successful login, navigating to dashboard");
-        // Show success message
-        setLoginSuccess(true);
-        // Redirect after a brief delay to show the message
-        setTimeout(() => {
-          navigate("/dashboard", { replace: true });
-        }, 1000);
-      } else {
-        console.log("Incorrect credentials");
-        setIsLoading(false);
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      setIsLoading(false);
-    }
-  };
+    performLogin(username, password);
+  }, [username, password, performLogin]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
