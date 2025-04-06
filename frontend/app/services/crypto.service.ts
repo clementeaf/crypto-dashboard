@@ -7,6 +7,9 @@ import {
   buildApiUrl, 
   handleApiResponse,
   ApiResponseError,
+  COINGECKO_ROUTES,
+  buildCoinGeckoUrl,
+  coingeckoFetchOptions
 } from './api.config';
 import type { Cryptocurrency } from '~/types/crypto';
 
@@ -141,15 +144,15 @@ export async function getExchangeRates(currency: string = 'USD'): Promise<Exchan
 }
 
 /**
- * Obtiene una lista de criptomonedas con sus detalles desde Coinbase
+ * Obtiene una lista de criptomonedas con sus detalles desde Coinbase (implementación original)
  * @param limit Número de criptomonedas a obtener (por defecto 10)
  */
-export async function getCryptocurrencies(limit: number = DEFAULT_LIMIT): Promise<Cryptocurrency[]> {
+export async function getCryptocurrenciesFromCoinbase(limit: number = DEFAULT_LIMIT): Promise<Cryptocurrency[]> {
   try {
     // Limitamos a la cantidad solicitada
     const cryptoIDs = TOP_CRYPTO_IDS.slice(0, Math.min(limit, TOP_CRYPTO_IDS.length));
     
-    console.log(`[DEBUG] Intentando obtener ${cryptoIDs.length} criptomonedas: ${cryptoIDs.join(', ')}`);
+    console.log(`[DEBUG] Intentando obtener ${cryptoIDs.length} criptomonedas de Coinbase: ${cryptoIDs.join(', ')}`);
     
     // Primero intentamos obtener BTC para calcular las tasas
     const btcCacheKey = 'crypto-BTC';
@@ -232,13 +235,91 @@ export async function getCryptocurrencies(limit: number = DEFAULT_LIMIT): Promis
     console.log(`[DEBUG] Total de criptomonedas procesadas: ${allPrices.length}`);
     return allPrices;
   } catch (error) {
-    console.error('[ERROR] Error al obtener criptomonedas:', error);
+    console.error('[ERROR] Error al obtener criptomonedas de Coinbase:', error);
     
     if (error instanceof ApiResponseError) {
       throw new Error(`Error ${error.status}: ${error.message}`);
     }
     
     throw new Error('Error al cargar los datos de criptomonedas');
+  }
+}
+
+/**
+ * Obtiene criptomonedas desde la API de CoinGecko
+ * @param limit Número de criptomonedas a obtener
+ */
+export async function getCryptocurrenciesFromCoinGecko(limit: number = DEFAULT_LIMIT): Promise<Cryptocurrency[]> {
+  const cacheKey = `coingecko-crypto-${limit}`;
+  
+  try {
+    return await fetchWithCache(cacheKey, async () => {
+      // Parámetros para la API de CoinGecko
+      const params: Record<string, string> = {
+        vs_currency: 'usd',
+        order: 'market_cap_desc',
+        per_page: limit.toString(),
+        page: '1',
+        sparkline: 'false',
+        price_change_percentage: '24h'
+      };
+      
+      console.log('[DEBUG] Obteniendo criptomonedas desde CoinGecko');
+      const url = buildCoinGeckoUrl(COINGECKO_ROUTES.coins, params);
+      console.log(`[DEBUG] URL de CoinGecko: ${url}`);
+      
+      const response = await fetch(url, { ...coingeckoFetchOptions, method: 'GET' });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        console.error('[ERROR] Error al obtener criptomonedas de CoinGecko:', errorData);
+        throw new Error(`Error ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log(`[DEBUG] Datos obtenidos de CoinGecko: ${data.length} criptomonedas`);
+      
+      // Transformar datos al formato de la aplicación
+      const cryptos = data.map((coin: any) => {
+        return {
+          id: coin.id,
+          symbol: coin.symbol.toUpperCase(),
+          name: coin.name,
+          image: coin.image, // CoinGecko proporciona URLs de imágenes
+          current_price: {
+            usd: coin.current_price,
+            btc: coin.current_price / (data[0].symbol === 'btc' ? data[0].current_price : 65000) // Aproximación
+          },
+          price_change_percentage_24h: coin.price_change_percentage_24h,
+          market_cap: coin.market_cap,
+          total_volume: coin.total_volume,
+          circulating_supply: coin.circulating_supply
+        } as Cryptocurrency;
+      });
+      
+      return cryptos;
+    });
+  } catch (error) {
+    console.error('[ERROR] Error al obtener criptomonedas de CoinGecko:', error);
+    throw error;
+  }
+}
+
+/**
+ * Obtiene una lista de criptomonedas, intentando primero con CoinGecko y usando Coinbase como respaldo
+ * @param limit Número de criptomonedas a obtener (por defecto 10)
+ */
+export async function getCryptocurrencies(limit: number = DEFAULT_LIMIT): Promise<Cryptocurrency[]> {
+  try {
+    // Intentar primero con CoinGecko
+    console.log('[INFO] Intentando obtener criptomonedas de CoinGecko');
+    return await getCryptocurrenciesFromCoinGecko(limit);
+  } catch (error) {
+    console.error('[ERROR] Error al obtener criptomonedas de CoinGecko, utilizando Coinbase como respaldo:', error);
+    
+    // Si falla, usar Coinbase como respaldo
+    console.log('[FALLBACK] Intentando obtener criptomonedas de Coinbase');
+    return await getCryptocurrenciesFromCoinbase(limit);
   }
 }
 

@@ -6,12 +6,21 @@
 // URL base para la API pública de Coinbase 
 export const API_BASE_URL = 'https://api.coinbase.com/v2';
 
+// URL base para la API pública de CoinGecko
+export const COINGECKO_API_URL = 'https://api.coingecko.com/api/v3';
+
 // Rutas de API para diferentes endpoints
 export const API_ROUTES = {
   exchangeRates: '/exchange-rates',
   currencies: '/currencies',
   prices: '/prices/spot',
   ticker: '/prices',
+};
+
+// Rutas de API CoinGecko
+export const COINGECKO_ROUTES = {
+  coins: '/coins/markets',
+  coinDetails: '/coins',
 };
 
 // Opciones por defecto para fetch
@@ -25,9 +34,34 @@ export const defaultFetchOptions: RequestInit = {
   signal: AbortSignal.timeout(30000),
 };
 
+// Opciones por defecto para fetch en CoinGecko
+export const coingeckoFetchOptions: RequestInit = {
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+  // Timeout de 30 segundos
+  signal: AbortSignal.timeout(30000),
+};
+
 // Función para construir URLs completas de API
 export function buildApiUrl(endpoint: string, params?: Record<string, string>): string {
   const url = new URL(`${API_BASE_URL}${endpoint}`);
+  
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        url.searchParams.append(key, value);
+      }
+    });
+  }
+  
+  return url.toString();
+}
+
+// Función para construir URLs completas de API de CoinGecko
+export function buildCoinGeckoUrl(endpoint: string, params?: Record<string, string>): string {
+  const url = new URL(`${COINGECKO_API_URL}${endpoint}`);
   
   if (params) {
     Object.entries(params).forEach(([key, value]) => {
