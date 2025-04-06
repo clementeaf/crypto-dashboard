@@ -223,19 +223,19 @@ export default function Dashboard({
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-800 text-white">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white">
       {/* Barra de navegación superior con efecto de vidrio */}
-      <nav className="sticky top-0 z-50 backdrop-blur-md bg-gray-900/70 border-b border-gray-700 shadow-lg">
+      <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-b border-gray-200 dark:border-gray-700 shadow-lg">
         <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-600">
+                <span className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">
                   {title}
                 </span>
               </div>
-              <div className="ml-2 px-2 py-1 rounded-full bg-blue-900/30 border border-blue-700/50 flex items-center">
-                <span className="text-xs text-blue-300">
+              <div className="ml-2 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700/50 flex items-center">
+                <span className="text-xs text-blue-600 dark:text-blue-300">
                   {username}
                 </span>
               </div>
@@ -243,7 +243,7 @@ export default function Dashboard({
             
             {/* Botón de menú móvil */}
             <button 
-              className="md:hidden p-2 rounded-lg bg-gray-800 text-gray-300 hover:bg-gray-700"
+              className="md:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700"
               onClick={toggleMobileMenu}
               aria-label="Menú"
             >
@@ -260,10 +260,10 @@ export default function Dashboard({
             
             {/* Menú escritorio */}
             <div className="hidden md:flex items-center space-x-4">
-              <div className="text-sm text-gray-400">
+              <div className="text-sm text-gray-600 dark:text-gray-400">
                 {isLoading ? (
                   <div className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -275,12 +275,12 @@ export default function Dashboard({
               </div>
               
               <div className="flex items-center space-x-2">
-                <div className="bg-gray-800/60 rounded-lg p-2 border border-gray-700">
+                <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg p-2 border border-gray-200 dark:border-gray-700">
                   <ThemeToggle />
                 </div>
                 
                 {onToggleAutoRefresh && (
-                  <div className="bg-gray-800/60 rounded-lg p-1 border border-gray-700">
+                  <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
                     <AutoRefreshControl
                       autoRefresh={autoRefresh}
                       refreshInterval={refreshInterval}
@@ -328,12 +328,12 @@ export default function Dashboard({
           
           {/* Menú móvil */}
           {mobileMenuOpen && (
-            <div className="md:hidden mt-4 space-y-3 pb-3 border-t border-gray-700 pt-3">
+            <div className="md:hidden mt-4 space-y-3 pb-3 border-t border-gray-200 dark:border-gray-700 pt-3">
               <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-400">
+                <div className="text-sm text-gray-600 dark:text-gray-400">
                   {isLoading ? (
                     <div className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-800 dark:text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -344,14 +344,14 @@ export default function Dashboard({
                   ) : null}
                 </div>
                 
-                <div className="bg-gray-800/60 rounded-lg p-2 border border-gray-700">
+                <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg p-2 border border-gray-200 dark:border-gray-700">
                   <ThemeToggle />
                 </div>
               </div>
               
               <div className="flex flex-wrap gap-2">
                 {onToggleAutoRefresh && (
-                  <div className="bg-gray-800/60 rounded-lg p-1 border border-gray-700 w-full">
+                  <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg p-1 border border-gray-200 dark:border-gray-700 w-full">
                     <AutoRefreshControl
                       autoRefresh={autoRefresh}
                       refreshInterval={refreshInterval}
@@ -401,41 +401,41 @@ export default function Dashboard({
       
       <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
         {/* Panel de bienvenida con stats generales */}
-        <div className="mb-6 sm:mb-8 bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl border border-gray-700/50 overflow-hidden">
+        <div className="mb-6 sm:mb-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
           <div className="p-4 sm:p-6">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-6">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-bold text-gray-100">Bienvenido al Dashboard</h2>
-                <p className="mt-2 text-sm sm:text-base text-gray-400">
+                <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">Bienvenido al Dashboard</h2>
+                <p className="mt-2 text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   Visualiza y analiza las principales criptomonedas en tiempo real
                 </p>
                 
                 {/* Stats flexibles */}
                 <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-4">
-                  <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700/50">
-                    <div className="text-xs sm:text-sm text-gray-400">Total Monedas</div>
-                    <div className="text-lg sm:text-2xl font-bold text-white">{cryptocurrencies.length}</div>
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700/50">
+                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Monedas</div>
+                    <div className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white">{cryptocurrencies.length}</div>
                   </div>
                   
-                  <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700/50">
-                    <div className="text-xs sm:text-sm text-gray-400">Monitoreadas</div>
-                    <div className="text-lg sm:text-2xl font-bold text-white">{filteredCryptos.length}</div>
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700/50">
+                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Monitoreadas</div>
+                    <div className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white">{filteredCryptos.length}</div>
                   </div>
                   
-                  <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700/50">
-                    <div className="text-xs sm:text-sm text-gray-400">Auto-refresh</div>
-                    <div className="text-lg sm:text-2xl font-bold text-white">{autoRefresh ? 'Activado' : 'Desactivado'}</div>
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700/50">
+                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Auto-refresh</div>
+                    <div className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white">{autoRefresh ? 'Activado' : 'Desactivado'}</div>
                   </div>
                   
-                  <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700/50">
-                    <div className="text-xs sm:text-sm text-gray-400">Intervalo</div>
-                    <div className="text-lg sm:text-2xl font-bold text-white">{refreshInterval}s</div>
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700/50">
+                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Intervalo</div>
+                    <div className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white">{refreshInterval}s</div>
                   </div>
                 </div>
               </div>
               
               <div className="shrink-0 w-full md:w-1/3 xl:w-1/4 mt-3 md:mt-0">
-                <div className="bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-700/50 shadow-inner">
+                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700/50 shadow-inner">
                   <SearchFilter 
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
@@ -451,16 +451,16 @@ export default function Dashboard({
         
         {/* Mensajes de error */}
         {apiError && (
-          <div className="mb-4 sm:mb-6 bg-red-900/20 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-red-500/30">
+          <div className="mb-4 sm:mb-6 bg-red-50 dark:bg-red-900/20 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-red-200 dark:border-red-500/30">
             <div className="flex items-start">
               <div className="flex-shrink-0">
-                <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <svg className="h-5 w-5 text-red-500 dark:text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-red-300">{apiError}</h3>
-                <div className="mt-1 text-xs text-red-300/80">
+                <h3 className="text-sm font-medium text-red-800 dark:text-red-300">{apiError}</h3>
+                <div className="mt-1 text-xs text-red-700 dark:text-red-300/80">
                   Los datos mostrados pueden no ser precisos. Intente actualizar en unos minutos.
                 </div>
               </div>
@@ -470,11 +470,11 @@ export default function Dashboard({
         
         {/* Grid de criptomonedas con efecto de cristal */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg sm:text-xl font-bold text-white">Criptomonedas</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white">Criptomonedas</h2>
           
           <div className="flex items-center gap-2">
             {filteredCryptos.length === 0 && searchTerm.trim() !== '' && (
-              <span className="text-xs sm:text-sm text-yellow-400">
+              <span className="text-xs sm:text-sm text-yellow-600 dark:text-yellow-400">
                 No se encontraron resultados
               </span>
             )}
@@ -486,25 +486,25 @@ export default function Dashboard({
             {Array.from({ length: 8 }).map((_, index) => (
               <div 
                 key={index} 
-                className="relative bg-gradient-to-br from-gray-800/70 to-gray-900/70 backdrop-blur-md rounded-xl border border-gray-700/50 shadow-lg overflow-hidden h-56 sm:h-64 animate-pulse"
+                className="relative bg-white dark:bg-gradient-to-br dark:from-gray-800/70 dark:to-gray-900/70 backdrop-blur-md rounded-xl border border-gray-200 dark:border-gray-700/50 shadow-lg overflow-hidden h-56 sm:h-64 animate-pulse"
               >
                 <div className="p-3 sm:p-5 space-y-4">
                   <div className="flex items-center space-x-4">
-                    <div className="w-8 sm:w-10 h-8 sm:h-10 bg-gray-700/50 rounded-full"></div>
+                    <div className="w-8 sm:w-10 h-8 sm:h-10 bg-gray-200 dark:bg-gray-700/50 rounded-full"></div>
                     <div className="flex-1 space-y-2">
-                      <div className="h-3 sm:h-4 bg-gray-700/50 rounded w-4/5"></div>
-                      <div className="h-2 sm:h-3 bg-gray-700/50 rounded w-3/5"></div>
+                      <div className="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700/50 rounded w-4/5"></div>
+                      <div className="h-2 sm:h-3 bg-gray-200 dark:bg-gray-700/50 rounded w-3/5"></div>
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <div className="h-6 sm:h-8 bg-gray-700/50 rounded"></div>
-                    <div className="h-3 sm:h-4 bg-gray-700/50 rounded"></div>
+                    <div className="h-6 sm:h-8 bg-gray-200 dark:bg-gray-700/50 rounded"></div>
+                    <div className="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700/50 rounded"></div>
                   </div>
-                  <div className="pt-3 sm:pt-4 border-t border-gray-700/30">
+                  <div className="pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700/30">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <div className="h-2 sm:h-3 bg-gray-700/50 rounded w-1/2"></div>
-                        <div className="h-3 sm:h-4 bg-gray-700/50 rounded w-3/4"></div>
+                        <div className="h-2 sm:h-3 bg-gray-200 dark:bg-gray-700/50 rounded w-1/2"></div>
+                        <div className="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700/50 rounded w-3/4"></div>
                       </div>
                     </div>
                   </div>
@@ -526,7 +526,7 @@ export default function Dashboard({
                   index === draggedItemIndex ? 'opacity-50 scale-105' : 'opacity-100'
                 }`}
               >
-                <div className="relative bg-gradient-to-br from-gray-800/70 to-gray-900/70 backdrop-blur-md rounded-xl border border-gray-700/50 shadow-lg overflow-hidden hover:shadow-indigo-500/10">
+                <div className="relative bg-white dark:bg-gradient-to-br dark:from-gray-800/70 dark:to-gray-900/70 backdrop-blur-md rounded-xl border border-gray-200 dark:border-gray-700/50 shadow-lg overflow-hidden hover:shadow-blue-500/10 dark:hover:shadow-indigo-500/10">
                   <div className="absolute top-0 left-0 w-full h-1">
                     <div className="h-full bg-gradient-to-r from-blue-500 to-purple-600"></div>
                   </div>
@@ -536,29 +536,29 @@ export default function Dashboard({
                         <img src={crypto.image} alt={crypto.symbol} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full" />
                       </div>
                       <div>
-                        <h3 className="text-base sm:text-lg font-bold text-white">{crypto.name}</h3>
-                        <span className="text-xs sm:text-sm text-gray-400">{crypto.symbol.toUpperCase()}</span>
+                        <h3 className="text-base sm:text-lg font-bold text-gray-800 dark:text-white">{crypto.name}</h3>
+                        <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">{crypto.symbol.toUpperCase()}</span>
                       </div>
                       <div className="ml-auto">
-                        <span className="bg-gray-800 text-gray-300 text-xs font-semibold px-2 py-1 rounded-full border border-gray-700">
+                        <span className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-xs font-semibold px-2 py-1 rounded-full border border-gray-200 dark:border-gray-700">
                           #{index + 1}
                         </span>
                       </div>
                     </div>
 
                     <div className="mb-3 sm:mb-4">
-                      <h4 className="text-xl sm:text-2xl font-bold text-white">
+                      <h4 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
                         ${crypto.current_price.usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </h4>
                     </div>
 
-                    <div className="pt-3 sm:pt-4 border-t border-gray-700/30">
+                    <div className="pt-3 sm:pt-4 border-t border-gray-200 dark:border-gray-700/30">
                       <div className="grid grid-cols-1 gap-y-2 sm:gap-y-3">
                         <div>
-                          <div className="text-xs sm:text-sm text-gray-400">
+                          <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                             Precio (BTC)
                           </div>
-                          <div className="text-sm sm:font-medium text-gray-300">
+                          <div className="text-sm sm:font-medium text-gray-700 dark:text-gray-300">
                             {crypto.current_price.btc.toLocaleString(undefined, { 
                               minimumFractionDigits: crypto.current_price.btc < 0.001 ? 8 : 6, 
                               maximumFractionDigits: crypto.current_price.btc < 0.001 ? 8 : 6
@@ -576,9 +576,9 @@ export default function Dashboard({
       </main>
       
       {/* Footer con efectos de vidrio */}
-      <footer className="bg-gray-900/70 backdrop-blur-md border-t border-gray-800 mt-6 sm:mt-12">
+      <footer className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 mt-6 sm:mt-12">
         <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
-          <div className="text-center text-gray-400 text-xs sm:text-sm">
+          <div className="text-center text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
             <p>Crypto Dashboard — Arrastra las tarjetas para reorganizarlas</p>
             <p className="mt-1">Última actualización: {lastUpdated}</p>
           </div>
