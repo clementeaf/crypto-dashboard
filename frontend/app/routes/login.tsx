@@ -34,6 +34,7 @@ export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const navigate = useNavigate();
   const { login, isLoggedIn } = useAuth();
   const actionData = useActionData<{ success: boolean; error?: string; username?: string; password?: string }>();
@@ -51,7 +52,12 @@ export default function Login() {
         login(actionData.username, actionData.password).then(success => {
           if (success) {
             console.log("Login cliente exitoso, navegando a dashboard...");
-            navigate("/dashboard", { replace: true });
+            // Mostrar mensaje de éxito
+            setLoginSuccess(true);
+            // Redirigir después de un breve retraso para mostrar el mensaje
+            setTimeout(() => {
+              navigate("/dashboard", { replace: true });
+            }, 1000);
           } else {
             console.error("Error al ejecutar login en cliente");
             setIsLoading(false);
@@ -64,7 +70,7 @@ export default function Login() {
     }
   }, [actionData, login, navigate]);
 
-  // Verificar si ya estamos autenticados
+  // Verificar si ya estamos autenticados y redirigir directamente sin mostrar modal
   useEffect(() => {
     if (isLoggedIn) {
       console.log("Usuario ya autenticado, redirigiendo a dashboard");
@@ -84,7 +90,12 @@ export default function Login() {
       
       if (success) {
         console.log("Login exitoso, navegando a dashboard");
-        navigate("/dashboard", { replace: true });
+        // Mostrar mensaje de éxito
+        setLoginSuccess(true);
+        // Redirigir después de un breve retraso para mostrar el mensaje
+        setTimeout(() => {
+          navigate("/dashboard", { replace: true });
+        }, 1000);
       } else {
         console.log("Credenciales incorrectas");
         setIsLoading(false);
@@ -95,25 +106,6 @@ export default function Login() {
     }
   };
 
-  // Si ya está autenticado, mostrar un botón para ir al dashboard
-  if (isLoggedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <div className="max-w-md w-full p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
-          <div className="text-center">
-            <p className="text-lg mb-4">Ya has iniciado sesión</p>
-            <LoadingButton
-              onClick={() => navigate("/dashboard")}
-              variant="primary"
-            >
-              Ir al dashboard
-            </LoadingButton>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
       <div className="max-w-md w-full p-6 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
@@ -122,58 +114,65 @@ export default function Login() {
           <p className="text-gray-600 dark:text-gray-300 mt-2">Inicia sesión para acceder</p>
         </div>
         
-        {/* Boton de inicio de sesión directo para entornos donde Form no funciona */}
-        <form onSubmit={handleSubmit} className="w-full">
-          {actionData?.error && (
-            <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
-              {actionData.error}
+        {/* Mostrar mensaje de éxito si el login fue exitoso */}
+        {loginSuccess ? (
+          <div className="mb-6 p-4 bg-green-100 text-green-700 rounded-lg">
+            <p className="font-medium">¡Inicio de sesión exitoso!</p>
+            <p className="text-sm">Redirigiendo al dashboard...</p>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="w-full">
+            {actionData?.error && (
+              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg">
+                {actionData.error}
+              </div>
+            )}
+            
+            <div className="mb-4">
+              <label htmlFor="username" className="block text-gray-700 dark:text-gray-300 mb-2">
+                Usuario
+              </label>
+              <input
+                type="text"
+                id="username"
+                name="username" 
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                required
+              />
             </div>
-          )}
-          
-          <div className="mb-4">
-            <label htmlFor="username" className="block text-gray-700 dark:text-gray-300 mb-2">
-              Usuario
-            </label>
-            <input
-              type="text"
-              id="username"
-              name="username" 
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              required
-            />
-          </div>
-          
-          <div className="mb-6">
-            <label htmlFor="password" className="block text-gray-700 dark:text-gray-300 mb-2">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password" 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-              required
-            />
-          </div>
-          
-          <LoadingButton
-            type="submit"
-            isLoading={isLoading}
-            variant="primary"
-            fullWidth
-            loadingText="Iniciando sesión..."
-          >
-            Iniciar sesión
-          </LoadingButton>
-        </form>
-        
-        <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>Credenciales de prueba: admin / admin</p>
-        </div>
+            
+            <div className="mb-6">
+              <label htmlFor="password" className="block text-gray-700 dark:text-gray-300 mb-2">
+                Contraseña
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                required
+              />
+            </div>
+            
+            <LoadingButton
+              type="submit"
+              isLoading={isLoading}
+              variant="primary"
+              fullWidth
+              loadingText="Iniciando sesión..."
+            >
+              Iniciar sesión
+            </LoadingButton>
+            
+            <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-400">
+              <p>Credenciales de prueba: admin / admin</p>
+            </div>
+          </form>
+        )}
       </div>
     </div>
   );

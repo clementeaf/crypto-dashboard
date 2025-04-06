@@ -12,7 +12,8 @@ import { LinksFunction, MetaFunction } from "@remix-run/node";
 import { createContext, useContext, useState, useEffect } from "react";
 import { AuthProvider } from "~/context/AuthContext";
 
-// No importamos directamente el CSS, sólo lo referenciamos en la función links
+// Importar CSS como side effect
+import "./tailwind.css";
 
 // Definir tipos para el tema
 type Theme = 'light' | 'dark' | 'system';
@@ -80,9 +81,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// En Remix, los CSS deben ser referenciados como links, no como módulos
+// Usar una URL relativa al archivo CSS
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: "/build/root-SHEYTI76.css" },
   { rel: "icon", href: "/favicon.ico" },
 ];
 
