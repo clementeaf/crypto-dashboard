@@ -13,7 +13,7 @@ export default function ThemeToggle() {
         <>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 sm:h-5 sm:w-5 text-gray-800 mr-1 sm:mr-2"
+            className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-white mr-1 sm:mr-2"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
@@ -23,19 +23,19 @@ export default function ThemeToggle() {
               clipRule="evenodd"
             />
           </svg>
-          <span className="text-xs sm:text-sm text-gray-800">Claro</span>
+          <span className="text-xs sm:text-sm text-gray-600 dark:text-white">Claro</span>
         </>
       ) : (
         <>
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 sm:h-5 sm:w-5 text-gray-200 mr-1 sm:mr-2"
+            className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 dark:text-gray-300 mr-1 sm:mr-2"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
           </svg>
-          <span className="text-xs sm:text-sm text-gray-200">Oscuro</span>
+          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Oscuro</span>
         </>
       )}
     </button>
