@@ -1,4 +1,5 @@
 import { CryptoCardProps } from "~/types/types";
+import { formatBtcPrice, formatUsdPrice } from "~/utils/utils";
 
 export default function CryptoCard({ 
   crypto, 
@@ -31,7 +32,7 @@ export default function CryptoCard({
 
         <div className="mb-4">
           <h4 className="text-2xl font-bold">
-            ${current_price.usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${formatUsdPrice(current_price.usd)}
           </h4>
         </div>
 
@@ -42,10 +43,7 @@ export default function CryptoCard({
                 Precio (BTC)
               </div>
               <div className="font-medium">
-                {current_price.btc.toLocaleString(undefined, { 
-                  minimumFractionDigits: current_price.btc < 0.001 ? 8 : 6, 
-                  maximumFractionDigits: current_price.btc < 0.001 ? 8 : 6
-                })} BTC
+                {formatBtcPrice(current_price.btc)} BTC
               </div>
             </div>
           </div>
