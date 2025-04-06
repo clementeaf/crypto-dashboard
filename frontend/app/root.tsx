@@ -115,7 +115,7 @@ const initialIsDark = getInitialDarkMode();
 
 export default function App() {
   return (
-    <html lang="es" className={`h-full ${initialIsDark ? 'dark' : ''}`}>
+    <html lang="es" className={`h-full${initialIsDark ? ' dark' : ''}`}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />

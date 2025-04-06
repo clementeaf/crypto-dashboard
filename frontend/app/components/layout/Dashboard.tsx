@@ -1,11 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigation } from '@remix-run/react';
-import CryptoCard from '~/components/cards/CryptoCard';
 import SearchFilter from '~/components/ui/SearchFilter';
 import ThemeToggle from '~/components/ui/ThemeToggle';
 import type { Cryptocurrency } from '~/types/crypto';
 import { getTimeSinceLastRefresh, setLastRefreshTime, getCardOrder, saveCardOrder } from '~/utils/storage';
-import LoadingButton from '~/components/ui/LoadingButton';
 import AutoRefreshControl from '~/components/ui/AutoRefreshControl';
 
 interface DashboardProps {
