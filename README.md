@@ -1,76 +1,91 @@
 # Crypto Dashboard
 
-A modern cryptocurrency dashboard that displays real-time data with a sleek Grok3-inspired design.
+## Description
 
-## Overview
+Crypto Dashboard is a web application that displays real-time information about cryptocurrencies using the Coinbase public API. The application includes a basic authentication system, data visualization in cards, automatic and manual information updates, and a diagnostic system to monitor the API connection.
 
-This project showcases a responsive dashboard for monitoring cryptocurrency prices, market caps, and trends. The intuitive interface allows users to track major cryptocurrencies, filter results, and customize their viewing experience.
+## Key Features
 
-## Project Structure
-
-- `/frontend`: Remix application for the frontend
-  - See `/frontend/README.md` for more details about development
-
-## Features
-
-- Real-time cryptocurrency data display with elegant card design
-- Responsive layout optimized for all device sizes
-- Dark/light/system theme support with smooth transitions
-- Drag-and-drop reordering of cryptocurrency cards
-- Search filtering by name or symbol
-- Auto-refresh capability with manual refresh option
-- Time-since-last-update tracking
-
-## Technologies
-
-- [Remix](https://remix.run) for server-rendered React applications
-- TypeScript for type safety
-- Tailwind CSS for styling with custom design system
-- Modern hooks-based React architecture
-- Web APIs for drag-and-drop functionality
-
-## Design
-
-The UI features a Grok3-inspired design system with:
-- Clean, minimalist interface with purposeful animations
-- Elegant card components with hover effects
-- Custom color scheme with primary accent colors
-- Consistent spacing and typography
-- Responsive design principles
+- **User Authentication**: Simple login system (credentials: admin/admin)
+- **Cryptocurrency Dashboard**: Visualization of up to 10 popular cryptocurrencies
+- **Information per Cryptocurrency**: Prices in USD and BTC, percentage change, and more
+- **Real-time Updates**: Automatic (configurable) and manual
+- **Cache System**: Avoids API rate limiting
+- **API Diagnostics**: Tools to test connection and debug issues
+- **Responsive Interface**: Adaptable to different screen sizes
 
 ## Installation
 
-1. Clone this repository
-```bash
-git clone https://github.com/clementeaf/crypto-dashboard.git
-cd crypto-dashboard
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/yourusername/crypto-dashboard.git
+   cd crypto-dashboard
+   ```
 
-2. Install frontend dependencies
-```bash
-cd frontend
-npm install
-```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-3. Start the development server
-```bash
-npm run dev
-```
+3. Configure environment variables by copying the example file:
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+5. Open your browser at [http://localhost:3000](http://localhost:3000)
 
 ## Usage
 
-- Use the search box to filter cryptocurrencies
-- Toggle between light/dark/system theme with the theme switcher
-- Click "Refresh" to update data manually or enable "Auto" for automatic updates
-- Drag and drop cards to reorder them according to your preference
-- View detailed price information, market cap, and 24h volume for each cryptocurrency
+1. Access with default credentials:
+   - Username: `admin`
+   - Password: `admin`
 
-## Documentation
+2. Explore the cryptocurrency dashboard
+   - View current prices
+   - Configure automatic updates
+   - Use diagnostic tools to test the API
 
-For more information, check:
-- [CHANGELOG.md](CHANGELOG.md) - Version history
-- [ROADMAP.md](ROADMAP.md) - Development roadmap
+## Technical Decisions and Trade-offs
 
-## License
+### Authentication System
+- **Decision**: Client-side authentication implementation with `sessionStorage`
+- **Reason**: Simplify development for a demo without backend
+- **Trade-off**: Not secure for production, but adequate for demonstration
 
-MIT License - See LICENSE file for details 
+### API Handling
+- **Decision**: Cache system and delays between requests
+- **Reason**: Avoid rate limiting of Coinbase's public API
+- **Trade-off**: Potentially less up-to-date data in exchange for greater stability
+
+### Fallback Data
+- **Decision**: Include static backup data when the API fails
+- **Reason**: Maintain a functional user experience even with connection problems
+- **Trade-off**: Possibly outdated data but always usable interface
+
+### Responsive Design
+- **Decision**: Adaptive layout with Tailwind CSS
+- **Reason**: Better experience on various devices
+- **Trade-off**: Greater complexity in interface development
+
+## Technologies Used
+
+- **Frontend**: Remix, React, TypeScript
+- **Styles**: Tailwind CSS
+- **APIs**: Coinbase Public API
+- **Tools**: Vite, Node.js
+
+## Future Improvements
+
+- Implement secure authentication with JWT and backend
+- Add historical price charts
+- Allow creation of custom portfolios
+- Implement price change notifications
+
+---
+
+**Note**: This application is a demonstration and should not be used for real investment decisions. 
