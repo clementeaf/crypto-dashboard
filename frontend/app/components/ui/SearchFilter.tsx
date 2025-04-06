@@ -26,7 +26,7 @@ export default function SearchFilter({
   }, []);
   
   return (
-    <div className={`grok-search relative transition-all duration-200 ${isFocused ? 'ring-2 ring-blue-500/40 scale-[1.01]' : ''}`}>
+    <div className={`grok-search relative transition-all duration-200 ${isFocused ? 'scale-[1.01]' : ''}`}>
       <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
         <svg 
           className="w-5 h-5 text-gray-500 dark:text-gray-400"
@@ -52,7 +52,7 @@ export default function SearchFilter({
           text-gray-900 dark:text-white 
           placeholder:text-gray-500 dark:placeholder:text-gray-500 
           border-gray-300 dark:border-gray-700 
-          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+          focus:outline-none focus:ring-0
           transition-all"
         placeholder={placeholder}
         value={searchTerm}
@@ -90,8 +90,8 @@ export default function SearchFilter({
       ) : isLoading ? (
         <div className="absolute inset-y-0 right-0 flex items-center pr-4">
           <div className="w-5 h-5 border-2 
-            border-blue-300/30 dark:border-blue-700/30 
-            border-t-blue-500 dark:border-t-blue-500 
+            border-gray-300/30 dark:border-gray-700/30 
+            border-t-gray-500 dark:border-t-gray-500 
             rounded-full animate-spin"></div>
         </div>
       ) : null}

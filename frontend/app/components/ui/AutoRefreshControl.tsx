@@ -34,7 +34,7 @@ const AutoRefreshControl = memo(function AutoRefreshControl({
           <div 
             className={`block w-10 h-6 rounded-full ${
               disabled ? 'bg-gray-300 dark:bg-gray-600' : 
-              autoRefresh ? 'bg-blue-400' : 'bg-gray-400'
+              autoRefresh ? 'bg-gray-600 dark:bg-gray-400' : 'bg-gray-400 dark:bg-gray-600'
             }`}
           ></div>
           <div 

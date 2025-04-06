@@ -225,17 +225,17 @@ export default function Dashboard({
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white">
       {/* Barra de navegación superior con efecto de vidrio */}
-      <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/70 dark:bg-gray-900/70 border-b border-gray-200 dark:border-gray-700 shadow-lg">
+      <nav className="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-black/80 border-b border-gray-200 dark:border-gray-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <span className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-600">
+                <span className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                   {title}
                 </span>
               </div>
-              <div className="ml-2 px-2 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700/50 flex items-center">
-                <span className="text-xs text-blue-600 dark:text-blue-300">
+              <div className="ml-2 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center">
+                <span className="text-xs text-gray-600 dark:text-gray-300">
                   {username}
                 </span>
               </div>
@@ -275,12 +275,12 @@ export default function Dashboard({
               </div>
               
               <div className="flex items-center space-x-2">
-                <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg p-2 border border-gray-200 dark:border-gray-700">
+                <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-2 border border-gray-200 dark:border-gray-700">
                   <ThemeToggle />
                 </div>
                 
                 {onToggleAutoRefresh && (
-                  <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
                     <AutoRefreshControl
                       autoRefresh={autoRefresh}
                       refreshInterval={refreshInterval}
@@ -294,11 +294,11 @@ export default function Dashboard({
                 <button
                   onClick={handleRefresh}
                   disabled={isLoading}
-                  className="flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all shadow-lg hover:shadow-indigo-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex items-center px-4 py-2 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-medium rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white dark:text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -317,7 +317,7 @@ export default function Dashboard({
                 {onLogout && (
                   <button
                     onClick={onLogout}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all shadow-lg"
+                    className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-lg transition-all shadow-sm"
                   >
                     Cerrar sesión
                   </button>
@@ -344,14 +344,14 @@ export default function Dashboard({
                   ) : null}
                 </div>
                 
-                <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg p-2 border border-gray-200 dark:border-gray-700">
+                <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-2 border border-gray-200 dark:border-gray-700">
                   <ThemeToggle />
                 </div>
               </div>
               
               <div className="flex flex-wrap gap-2">
                 {onToggleAutoRefresh && (
-                  <div className="bg-gray-100 dark:bg-gray-800/60 rounded-lg p-1 border border-gray-200 dark:border-gray-700 w-full">
+                  <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700 w-full">
                     <AutoRefreshControl
                       autoRefresh={autoRefresh}
                       refreshInterval={refreshInterval}
@@ -365,11 +365,11 @@ export default function Dashboard({
                 <button
                   onClick={handleRefresh}
                   disabled={isLoading}
-                  className="flex-1 flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-lg transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 flex items-center justify-center px-4 py-2 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-200 text-white dark:text-gray-900 font-medium rounded-lg transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isLoading ? (
                     <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white dark:text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
@@ -388,7 +388,7 @@ export default function Dashboard({
                 {onLogout && (
                   <button
                     onClick={onLogout}
-                    className="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all shadow-lg text-center"
+                    className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-lg transition-all shadow-sm text-center"
                   >
                     Cerrar sesión
                   </button>
