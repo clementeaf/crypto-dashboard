@@ -79,15 +79,18 @@ export default function DashboardRoute() {
   // Usar AuthContext
   const { user, isLoggedIn, logout } = useAuth();
   
-  // Usar ThemeContext - Solo la referencia, no usamos en efectos para evitar loops
+  // Usar ThemeContext
   const { isDark } = useTheme();
   
-  // Inicializar logger (mover fuera del useRef para mantener orden consistente de hooks)
+  // Inicializar logger
   const logger = useLogger({
     maxLogs: 100,
     captureConsole: true,
     persistLogs: false
   });
+  
+  // Revalidator para actualizar los datos
+  const revalidator = useRevalidator();
   
   // Estado para controles de UI
   const [showLogs, setShowLogs] = useState(false);
@@ -106,41 +109,14 @@ export default function DashboardRoute() {
   // Estado para la actualización automática
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState(60); // segundos
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-  
-  // Estado para mostrar un mensaje de error personalizado
   const [apiErrorMessage, setApiErrorMessage] = useState<string | null>(error || null);
   
-  // Referencia al logger para evitar recrearlo en cada render
+  // Referencias
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const loggerRef = useRef(logger);
   
-  // Actualizar la referencia cuando cambie el logger
-  useEffect(() => {
-    loggerRef.current = logger;
-  }, [logger]);
-
-  // Obtener revalidator para actualizar los datos
-  const revalidator = useRevalidator();
-  
-  // Verificar autenticación del lado del cliente
-  useEffect(() => {
-    // Verificación más estricta
-    if (!isLoggedIn) {
-      console.log("Usuario no autenticado, redirigiendo a login");
-      navigate("/login", { replace: true });
-      return;
-    } else {
-      console.log("Usuario autenticado:", user);
-    }
-  }, [isLoggedIn, navigate, user]);
-  
-  // Si no está autenticado, no renderizar nada mientras redirige
-  if (!isLoggedIn) {
-    console.log("No autenticado, renderizando nada mientras redirige");
-    return <div className="bg-gray-100 dark:bg-gray-900 min-h-screen"></div>;
-  }
-
+  // Callbacks - IMPORTANTE: Declarar TODOS los useCallback antes de cualquier useEffect
   // Función para cerrar sesión
   const handleLogout = useCallback(() => {
     loggerRef.current.info("Usuario cerró sesión", "auth");
@@ -213,6 +189,21 @@ export default function DashboardRoute() {
     setLastUpdated(new Date().toLocaleTimeString());
   }, [revalidator]);
   
+  // Actualizar la referencia del logger cuando cambie
+  useEffect(() => {
+    loggerRef.current = logger;
+  }, [logger]);
+
+  // Verificar autenticación del lado del cliente
+  useEffect(() => {
+    if (!isLoggedIn) {
+      console.log("Usuario no autenticado, redirigiendo a login");
+      navigate("/login", { replace: true });
+    } else {
+      console.log("Usuario autenticado:", user);
+    }
+  }, [isLoggedIn, navigate, user]);
+  
   // Manejar errores de revalidación
   useEffect(() => {
     if (revalidator.state === 'idle' && error) {
@@ -257,6 +248,11 @@ export default function DashboardRoute() {
       }
     };
   }, [autoRefresh, refreshInterval, handleRefresh]);
+
+  // Si no está autenticado, no renderizar nada mientras redirige
+  if (!isLoggedIn) {
+    return <div className="bg-gray-100 dark:bg-gray-900 min-h-screen"></div>;
+  }
 
   return (
     <Dashboard 

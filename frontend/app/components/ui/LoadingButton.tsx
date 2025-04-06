@@ -32,17 +32,11 @@ const LoadingButton = memo(function LoadingButton({
   const baseStyle = 'rounded flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500';
   const disabledStyle = 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed';
   
-  const buttonStyle = `
-    ${baseStyle}
-    ${!disabled && !isLoading ? variantStyles[variant] : disabledStyle}
-    ${sizeStyles[size]}
-    ${fullWidth ? 'w-full' : ''}
-    ${className}
-  `;
+  const buttonStyle = `${baseStyle} ${!disabled && !isLoading ? variantStyles[variant] : disabledStyle} ${sizeStyles[size]} ${fullWidth ? 'w-full' : ''} ${className}`.trim();
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (type !== 'submit' && onClick) {
-      onClick();
+    if (onClick) {
+      onClick(e);
     }
   };
 

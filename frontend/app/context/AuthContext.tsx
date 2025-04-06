@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useMemo, useCallback } from 'react';
 import { login as authLogin, logout as authLogout, isAuthenticated, getAuthUser } from '~/utils/auth';
 import { AuthUser, AuthContextType } from '~/types/auth.types';
 
@@ -19,29 +19,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser>(null);
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
+  // Función para verificar y actualizar el estado de autenticación
+  const checkAuthentication = useCallback(() => {
+    const authenticated = isAuthenticated();
+    
+    setIsLoggedIn(authenticated);
+    
+    if (authenticated) {
+      const userData = getAuthUser();
+      setUser(userData);
+    } else {
+      setUser(null);
+    }
+    
+    return authenticated;
+  }, []);
+
   // Comprobar autenticación inicial
   useEffect(() => {
-    const checkAuthentication = () => {
-      const authenticated = isAuthenticated();
-      console.log("Verificando autenticación:", authenticated);
-      
-      setIsLoggedIn(authenticated);
-      
-      if (authenticated) {
-        const userData = getAuthUser();
-        console.log("Usuario autenticado:", userData);
-        setUser(userData);
-      } else {
-        setUser(null);
-      }
-    };
-
     // Comprobar al inicio
     checkAuthentication();
 
     // Comprobar cuando hay cambios en el storage (por si se cierra sesión en otra pestaña)
     const handleStorageChange = (e: StorageEvent) => {
-      console.log("Storage cambiado:", e.key);
       if (e.key === 'crypto_dashboard_auth' || e.key === null) {
         checkAuthentication();
       }
@@ -51,15 +51,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, []);
+  }, [checkAuthentication]);
 
-  // Función de login
-  const login = async (username: string, password: string): Promise<boolean> => {
-    console.log("AuthContext: Intentando login con", username);
-    
+  // Función de login memoizada
+  const login = useCallback(async (username: string, password: string): Promise<boolean> => {
     // Implementamos una verificación síncrona primero
     if (username !== 'admin' || password !== 'admin') {
-      console.log("AuthContext: Credenciales incorrectas");
       return false;
     }
     
@@ -71,7 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         
         if (success) {
           const userData = getAuthUser();
-          console.log("AuthContext: Login exitoso, usuario:", userData);
           setUser(userData);
           setIsLoggedIn(true);
         }
@@ -79,38 +75,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         resolve(success);
       }, 500);
     });
-  };
+  }, []);
 
-  // Función de logout
-  const logout = () => {
-    console.log("AuthContext: Cerrando sesión");
+  // Función de logout memoizada
+  const logout = useCallback(() => {
     authLogout();
     setUser(null);
     setIsLoggedIn(false);
-  };
+  }, []);
 
-  // Función para verificar la autenticación
-  const checkAuth = (): boolean => {
-    const authenticated = isAuthenticated();
-    console.log("Verificando autenticación:", authenticated);
-    
-    setIsLoggedIn(authenticated);
-    
-    if (authenticated && !user) {
-      const userData = getAuthUser();
-      setUser(userData);
-    }
-    
-    return authenticated;
-  };
+  // Función para verificar la autenticación memoizada
+  const checkAuth = useCallback((): boolean => {
+    return checkAuthentication();
+  }, [checkAuthentication]);
 
-  const value = {
+  // Memoizar el valor del contexto para evitar renderizados innecesarios
+  const value = useMemo(() => ({
     user,
     isLoggedIn,
     login,
     logout,
     checkAuth
-  };
+  }), [user, isLoggedIn, login, logout, checkAuth]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

@@ -1,14 +1,12 @@
-import { useRef, useState, useEffect } from 'react';
-import { useTheme } from '~/root';
+import { useRef, useState, useEffect, memo } from 'react';
 import { SearchFilterProps } from '~/types/types';
 
-export default function SearchFilter({
+const SearchFilter = memo(function SearchFilter({
   searchTerm,
   setSearchTerm,
   isLoading = false,
   placeholder = "Search cryptocurrency by name or symbol..."
 }: SearchFilterProps) {
-  const { isDark } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -91,4 +89,6 @@ export default function SearchFilter({
       ) : null}
     </div>
   );
-} 
+});
+
+export default SearchFilter; 

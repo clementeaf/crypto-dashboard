@@ -66,7 +66,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'wa
 
 export type LoadingButtonProps = {
     children: ReactNode;
-    onClick?: () => void;
+    onClick?: (e?: React.MouseEvent<HTMLButtonElement>) => void;
     isLoading?: boolean;
     disabled?: boolean;
     variant?: ButtonVariant;

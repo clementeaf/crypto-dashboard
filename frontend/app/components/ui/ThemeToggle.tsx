@@ -1,6 +1,7 @@
+import { memo } from 'react';
 import { useTheme } from '~/root';
 
-export default function ThemeToggle() {
+const ThemeToggle = memo(function ThemeToggle() {
   const { isDark, toggleTheme } = useTheme();
   
   return (
@@ -40,4 +41,6 @@ export default function ThemeToggle() {
       )}
     </button>
   );
-} 
+});
+
+export default ThemeToggle; 
