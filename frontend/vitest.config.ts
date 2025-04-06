@@ -9,6 +9,12 @@ export default defineConfig({
     setupFiles: ['./app/setupTests.ts'],
     globals: true,
     include: ['**/__tests__/**/*.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      include: ['app/components/cards/CryptoCard.tsx'],
+      exclude: ['node_modules', 'app/setupTests.ts']
+    }
   },
   resolve: {
     alias: {
