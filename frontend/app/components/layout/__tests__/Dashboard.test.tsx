@@ -5,6 +5,16 @@ import type { Cryptocurrency } from '~/types/crypto';
 
 // Mocks simplificados para componentes y hooks
 
+// Mock para setLastRefreshTime
+vi.mock('~/utils/storage', () => ({
+  setLastRefreshTime: vi.fn()
+}));
+
+// Mock para useNavigation de Remix
+vi.mock('@remix-run/react', () => ({
+  useNavigation: () => ({ state: 'idle' })
+}));
+
 // Mock de los componentes hijos para evitar renderizarlos completamente
 vi.mock('../DashboardHeader', () => ({
   default: ({ title }: { title: string }) => <header data-testid="dashboard-header">{title}</header>
@@ -50,16 +60,6 @@ vi.mock('~/hooks/useFilteredCryptos', () => ({
     setSearchTerm: vi.fn(),
     filteredCryptos: cryptos
   })
-}));
-
-// Mock para useNavigation de Remix
-vi.mock('@remix-run/react', () => ({
-  useNavigation: () => ({ state: 'idle' })
-}));
-
-// Mock para setLastRefreshTime
-vi.mock('~/utils/storage', () => ({
-  setLastRefreshTime: vi.fn()
 }));
 
 // Datos de muestra para las pruebas
@@ -162,12 +162,6 @@ describe('Dashboard', () => {
 
   test('llama a onRefresh cuando se activa la actualización automática', () => {
     const onRefresh = vi.fn();
-    
-    // Obtener referencia al mock para verificarlo después
-    const setLastRefreshTimeMock = vi.fn();
-    vi.mock('~/utils/storage', () => ({
-      setLastRefreshTime: setLastRefreshTimeMock
-    }));
     
     render(
       <Dashboard
