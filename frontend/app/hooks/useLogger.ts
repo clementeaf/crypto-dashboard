@@ -1,8 +1,10 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+
+type LogLevel = 'log' | 'error' | 'warn' | 'info';
 
 type LogEntry = {
   message: string;
-  type: 'log' | 'error' | 'warn' | 'info';
+  type: LogLevel;
   timestamp: string;
   source?: string;
 };
@@ -12,6 +14,10 @@ type UseLoggerOptions = {
   captureConsole?: boolean;
   sources?: string[];
   persistLogs?: boolean;
+};
+
+type ConsoleMethods = {
+  [K in LogLevel]: typeof console[K]
 };
 
 /**
@@ -38,15 +44,10 @@ export function useLogger(options: UseLoggerOptions = {}) {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   
   // Referencia para funciones originales de consola
-  const originalConsoleRef = useRef<{
-    log: typeof console.log,
-    error: typeof console.error,
-    warn: typeof console.warn,
-    info: typeof console.info
-  }>();
+  const originalConsoleRef = useRef<ConsoleMethods>();
 
   // Añadir una entrada de log
-  const addLog = useCallback((message: string, type: LogEntry['type'] = 'log', source?: string) => {
+  const addLog = useCallback((message: any, type: LogLevel = 'log', source?: string) => {
     const entry: LogEntry = {
       message: typeof message === 'object' ? JSON.stringify(message, null, 2) : String(message),
       type,
@@ -72,7 +73,7 @@ export function useLogger(options: UseLoggerOptions = {}) {
     return entry;
   }, []);
 
-  // Métodos para diferentes tipos de logs - ahora son estables entre renders
+  // Métodos para diferentes tipos de logs - memoizados para estabilidad
   const log = useCallback((message: any, source?: string) => addLog(message, 'log', source), [addLog]);
   const error = useCallback((message: any, source?: string) => addLog(message, 'error', source), [addLog]);
   const warn = useCallback((message: any, source?: string) => addLog(message, 'warn', source), [addLog]);
@@ -98,7 +99,35 @@ export function useLogger(options: UseLoggerOptions = {}) {
     logFunctionsRef.current = { log, error, warn, info };
   }, [log, error, warn, info]);
 
-  // Capturar console.log, console.error, etc. - Ahora con control para evitar bucles
+  // Función helper para crear override de consola - evita duplicación de código
+  const createConsoleOverride = useCallback((method: LogLevel) => {
+    const originalMethod = originalConsoleRef.current![method];
+    
+    // Flag para prevenir recursión
+    let isLogging = false;
+    
+    return (...args: any[]) => {
+      if (isLogging) {
+        // Si ya estamos logeando, llamar al método original para evitar bucles
+        originalMethod(...args);
+        return;
+      }
+      
+      isLogging = true;
+      originalMethod(...args);
+      
+      try {
+        // Usar la referencia más reciente a la función log
+        logFunctionsRef.current[method](
+          args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ')
+        );
+      } finally {
+        isLogging = false;
+      }
+    };
+  }, []);
+
+  // Capturar console.log, console.error, etc. - Refactorizado para evitar duplicación
   useEffect(() => {
     // Solo hacer override si captureConsole es true y no lo hemos hecho antes
     if (!captureConsole || originalConsoleRef.current) return;
@@ -111,86 +140,11 @@ export function useLogger(options: UseLoggerOptions = {}) {
       info: console.info,
     };
 
-    // Flag para prevenir recursión
-    let isLogging = false;
-    
-    // Override para console.log
-    console.log = (...args) => {
-      if (isLogging) {
-        // Si ya estamos logeando, llamar al método original para evitar bucles
-        originalConsoleRef.current!.log(...args);
-        return;
-      }
-      
-      isLogging = true;
-      originalConsoleRef.current!.log(...args);
-      
-      try {
-        // Usar la referencia más reciente a la función log
-        logFunctionsRef.current.log(
-          args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ')
-        );
-      } finally {
-        isLogging = false;
-      }
-    };
-
-    // Override para console.error
-    console.error = (...args) => {
-      if (isLogging) {
-        originalConsoleRef.current!.error(...args);
-        return;
-      }
-      
-      isLogging = true;
-      originalConsoleRef.current!.error(...args);
-      
-      try {
-        logFunctionsRef.current.error(
-          args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ')
-        );
-      } finally {
-        isLogging = false;
-      }
-    };
-
-    // Override para console.warn
-    console.warn = (...args) => {
-      if (isLogging) {
-        originalConsoleRef.current!.warn(...args);
-        return;
-      }
-      
-      isLogging = true;
-      originalConsoleRef.current!.warn(...args);
-      
-      try {
-        logFunctionsRef.current.warn(
-          args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ')
-        );
-      } finally {
-        isLogging = false;
-      }
-    };
-
-    // Override para console.info
-    console.info = (...args) => {
-      if (isLogging) {
-        originalConsoleRef.current!.info(...args);
-        return;
-      }
-      
-      isLogging = true;
-      originalConsoleRef.current!.info(...args);
-      
-      try {
-        logFunctionsRef.current.info(
-          args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' ')
-        );
-      } finally {
-        isLogging = false;
-      }
-    };
+    // Aplicar overrides usando la función helper
+    console.log = createConsoleOverride('log');
+    console.error = createConsoleOverride('error');
+    console.warn = createConsoleOverride('warn');
+    console.info = createConsoleOverride('info');
 
     // Restaurar los métodos originales cuando se desmonte el componente
     return () => {
@@ -202,7 +156,7 @@ export function useLogger(options: UseLoggerOptions = {}) {
         originalConsoleRef.current = undefined;
       }
     };
-  }, [captureConsole]); // Solo depende de captureConsole, no de las funciones de logging
+  }, [captureConsole, createConsoleOverride]);
 
   // Cargar logs persistentes si está habilitado (solo una vez al inicio)
   useEffect(() => {
@@ -219,12 +173,12 @@ export function useLogger(options: UseLoggerOptions = {}) {
     }
   }, [persistLogs]);
 
-  // Filtrar logs por tipo o fuente
+  // Memoizar la función filterLogs para estabilidad
   const filterLogs = useCallback((filterFn: (log: LogEntry) => boolean) => {
     return logs.filter(filterFn);
   }, [logs]);
 
-  // Filtros comunes
+  // Memoizar filtros comunes
   const getErrorLogs = useCallback(() => filterLogs(log => log.type === 'error'), [filterLogs]);
   const getWarningLogs = useCallback(() => filterLogs(log => log.type === 'warn'), [filterLogs]);
   const getInfoLogs = useCallback(() => filterLogs(log => log.type === 'info'), [filterLogs]);
@@ -232,7 +186,8 @@ export function useLogger(options: UseLoggerOptions = {}) {
   const getLogsBySource = useCallback((source: string) => 
     filterLogs(log => log.source === source), [filterLogs]);
 
-  return {
+  // Memoizar el objeto de retorno para evitar renderizados innecesarios
+  return useMemo(() => ({
     logs,
     addLog,
     log,
@@ -245,5 +200,18 @@ export function useLogger(options: UseLoggerOptions = {}) {
     getWarningLogs,
     getInfoLogs,
     getLogsBySource
-  };
+  }), [
+    logs,
+    addLog,
+    log,
+    error,
+    warn,
+    info,
+    clearLogs,
+    filterLogs,
+    getErrorLogs,
+    getWarningLogs,
+    getInfoLogs,
+    getLogsBySource
+  ]);
 } 

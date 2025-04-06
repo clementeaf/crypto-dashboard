@@ -11,7 +11,7 @@ interface UseFilterOptions {
 interface UseFilterReturn {
   filteredItems: Cryptocurrency[];
   searchTerm: string;
-  setSearchTerm: (value: string) => void;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
   resetFilter: () => void;
 }
 
@@ -42,10 +42,11 @@ export function useFilter({ items }: UseFilterOptions): UseFilterReturn {
     });
   }, [items, searchTerm]);
 
-  return {
+  // Memoizar el objeto de retorno para evitar renderizados innecesarios
+  return useMemo(() => ({
     filteredItems,
     searchTerm,
     setSearchTerm,
     resetFilter,
-  };
+  }), [filteredItems, searchTerm, resetFilter]);
 } 

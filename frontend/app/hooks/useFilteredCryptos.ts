@@ -1,29 +1,32 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import type { Cryptocurrency } from '~/types/crypto';
 
 export function useFilteredCryptos(cryptocurrencies: Cryptocurrency[]) {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filteredCryptos, setFilteredCryptos] = useState<Cryptocurrency[]>(cryptocurrencies);
+  const [searchTerm, setSearchTerm] = useState<string>('');
   
-  // Filter cryptocurrencies based on search term
-  useEffect(() => {
+  // Función para restablecer el filtro
+  const resetFilter = useCallback(() => {
+    setSearchTerm('');
+  }, []);
+  
+  // Filtrar criptomonedas basado en término de búsqueda usando useMemo en lugar de useEffect
+  const filteredCryptos = useMemo(() => {
     if (!searchTerm.trim()) {
-      setFilteredCryptos(cryptocurrencies);
-      return;
+      return cryptocurrencies;
     }
     
     const normalizedSearchTerm = searchTerm.toLowerCase().trim();
-    const filtered = cryptocurrencies.filter(crypto => 
+    return cryptocurrencies.filter(crypto => 
       crypto.name.toLowerCase().includes(normalizedSearchTerm) || 
       crypto.symbol.toLowerCase().includes(normalizedSearchTerm)
     );
-    
-    setFilteredCryptos(filtered);
   }, [cryptocurrencies, searchTerm]);
   
-  return {
+  // Memoizar el objeto de retorno para evitar renderizados innecesarios
+  return useMemo(() => ({
     searchTerm,
     setSearchTerm,
-    filteredCryptos
-  };
+    filteredCryptos,
+    resetFilter
+  }), [searchTerm, filteredCryptos, resetFilter]);
 } 
