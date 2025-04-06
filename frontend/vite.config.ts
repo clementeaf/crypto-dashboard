@@ -21,4 +21,14 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
+  // Desactivar completamente HMR (Hot Module Replacement)
+  server: {
+    hmr: false,
+    // No intentar abrir el navegador automáticamente
+    open: false,
+    // No auto-recargar la página
+    watch: {
+      usePolling: false,
+    }
+  },
 });

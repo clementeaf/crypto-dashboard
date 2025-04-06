@@ -5,22 +5,49 @@ import SearchFilter from '~/components/ui/SearchFilter';
 import ThemeToggle from '~/components/ui/ThemeToggle';
 import type { Cryptocurrency } from '~/types/crypto';
 import { getTimeSinceLastRefresh, setLastRefreshTime, getCardOrder, saveCardOrder } from '~/utils/storage';
+import LoadingButton from '~/components/ui/LoadingButton';
+import AutoRefreshControl from '~/components/ui/AutoRefreshControl';
 
 interface DashboardProps {
   cryptocurrencies: Cryptocurrency[];
   onRefresh: () => void;
-  error?: string | null;
+  apiError?: string | null;
+  title?: string;
+  username?: string;
+  onLogout?: () => void;
+  lastUpdated?: string | null;
+  autoRefresh?: boolean;
+  onToggleAutoRefresh?: () => void;
+  refreshInterval?: number;
+  onChangeRefreshInterval?: (interval: number) => void;
 }
 
-export default function Dashboard({ cryptocurrencies, onRefresh, error }: DashboardProps) {
+export default function Dashboard({ 
+  cryptocurrencies, 
+  onRefresh, 
+  apiError,
+  title = "Crypto Dashboard",
+  username = "Usuario",
+  onLogout,
+  lastUpdated,
+  autoRefresh = false,
+  onToggleAutoRefresh,
+  refreshInterval = 60,
+  onChangeRefreshInterval
+}: DashboardProps) {
   const navigation = useNavigation();
   const isLoading = navigation.state === 'loading';
   const [timeSinceRefresh, setTimeSinceRefresh] = useState<number | null>(null);
-  const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(false);
+  const [isAutoRefreshEnabled, setIsAutoRefreshEnabled] = useState(autoRefresh);
   const [searchTerm, setSearchTerm] = useState('');
   const [cryptos, setCryptos] = useState<Cryptocurrency[]>(cryptocurrencies);
   const [filteredCryptos, setFilteredCryptos] = useState<Cryptocurrency[]>(cryptocurrencies);
   const [draggedItemIndex, setDraggedItemIndex] = useState<number | null>(null);
+  
+  // Sincronizar el estado local con el prop
+  useEffect(() => {
+    setIsAutoRefreshEnabled(autoRefresh);
+  }, [autoRefresh]);
   
   // Update cryptos when cryptocurrencies prop changes, respecting saved order
   useEffect(() => {
@@ -110,23 +137,39 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
     return () => clearInterval(interval);
   }, [isLoading]);
   
-  // Handle auto-refresh
+  // Handle auto-refresh usando props externos
   useEffect(() => {
-    if (!isAutoRefreshEnabled) return;
+    if (!isAutoRefreshEnabled || !onToggleAutoRefresh) return;
     
     const interval = setInterval(() => {
       onRefresh();
       setLastRefreshTime();
-    }, 60000);
+    }, (refreshInterval || 60) * 1000);
     
     return () => clearInterval(interval);
-  }, [isAutoRefreshEnabled, onRefresh]);
+  }, [isAutoRefreshEnabled, onRefresh, refreshInterval]);
   
   // Handle manual refresh
   const handleRefresh = useCallback(() => {
     onRefresh();
     setLastRefreshTime();
   }, [onRefresh]);
+  
+  // Toggle interno/externo de auto-refresh
+  const handleToggleAutoRefresh = useCallback(() => {
+    if (onToggleAutoRefresh) {
+      onToggleAutoRefresh();
+    } else {
+      setIsAutoRefreshEnabled(prev => !prev);
+    }
+  }, [onToggleAutoRefresh]);
+  
+  // Cambio interno/externo de intervalo
+  const handleChangeInterval = useCallback((interval: number) => {
+    if (onChangeRefreshInterval) {
+      onChangeRefreshInterval(interval);
+    }
+  }, [onChangeRefreshInterval]);
   
   // Guardar el orden actual en localStorage
   const saveCurrentOrder = useCallback((newCryptos: Cryptocurrency[]) => {
@@ -173,12 +216,33 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
   };
   
   return (
-    <div className="max-w-7xl mx-auto px-4 py-6">
+    <div className="max-w-7xl mx-auto">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 pb-4 border-b border-gray-200 dark:border-gray-700">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Crypto Dashboard</h1>
+          <div className="flex items-center justify-between">
+            <h1 className="text-2xl sm:text-3xl font-bold">{title}</h1>
+            
+            {/* Información del usuario y botón de logout */}
+            {onLogout && (
+              <div className="flex items-center">
+                <span className="text-sm text-gray-600 dark:text-gray-400 mr-3">
+                  {username}
+                </span>
+                <LoadingButton
+                  onClick={onLogout}
+                  variant="danger"
+                  size="sm"
+                >
+                  Cerrar sesión
+                </LoadingButton>
+              </div>
+            )}
+          </div>
+          
           <p className="text-gray-500 dark:text-gray-400 mt-1">
-            Monitor top cryptocurrencies in real-time
+            {isLoading ? 'Actualizando datos...' : 
+              lastUpdated ? `Última actualización: ${lastUpdated}` : 
+              'Monitor top cryptocurrencies in real-time'}
           </p>
         </div>
         
@@ -186,6 +250,27 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
           <div>
             <ThemeToggle />
           </div>
+          
+          {onToggleAutoRefresh && (
+            <AutoRefreshControl
+              autoRefresh={autoRefresh}
+              refreshInterval={refreshInterval}
+              onToggleAutoRefresh={handleToggleAutoRefresh}
+              onChangeInterval={handleChangeInterval}
+              disabled={isLoading}
+            />
+          )}
+          
+          <LoadingButton 
+            onClick={handleRefresh}
+            isLoading={isLoading}
+            disabled={isLoading}
+            variant="primary"
+            size="sm"
+            loadingText="Actualizando..."
+          >
+            Actualizar datos
+          </LoadingButton>
         </div>
       </header>
       
@@ -197,16 +282,25 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
         />
       </div>
       
-      {error && (
+      {apiError && (
         <div className="bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200 rounded-lg p-4 mb-6 border border-red-200 dark:border-red-800/30">
-          <p>{error}</p>
+          <p className="font-medium">{apiError}</p>
+          <p className="text-sm">Los datos mostrados son aproximados. Intente actualizando nuevamente en unos minutos.</p>
         </div>
       )}
       
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Cryptocurrencies</h2>
-        <div className="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
-          {filteredCryptos.length} of {cryptocurrencies.length}
+        <h2 className="text-xl font-semibold">Criptomonedas</h2>
+        <div className="flex items-center gap-2">
+          <div className="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
+            {filteredCryptos.length} de {cryptocurrencies.length}
+          </div>
+          
+          {filteredCryptos.length === 0 && searchTerm.trim() !== '' && (
+            <span className="text-sm text-orange-500 dark:text-orange-400">
+              No se encontraron resultados
+            </span>
+          )}
         </div>
       </div>
       
@@ -245,48 +339,29 @@ export default function Dashboard({ cryptocurrencies, onRefresh, error }: Dashbo
             </div>
           ))}
         </div>
-      ) : filteredCryptos.length === 0 ? (
-        <div className="text-center py-12 bg-gray-100 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
-          <div className="max-w-md mx-auto space-y-2">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-12 w-12 mx-auto text-gray-400" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path 
-                strokeLinecap="round" 
-                strokeLinejoin="round" 
-                strokeWidth={1.5} 
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
-              />
-            </svg>
-            <p className="text-gray-500 dark:text-gray-400">
-              No se encontraron criptomonedas con <span className="font-semibold">"{searchTerm}"</span>
-            </p>
-            <button 
-              className="mt-4 px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg text-sm font-medium transition-colors"
-              onClick={() => setSearchTerm('')}
-            >
-              Limpiar búsqueda
-            </button>
-          </div>
-        </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {filteredCryptos.map((crypto, index) => (
-            <CryptoCard
-              key={crypto.id + '-' + index}
-              crypto={crypto}
-              index={index}
-              isDragging={draggedItemIndex === index}
-              onDragStart={handleDragStart}
-              onDragEnter={handleDragEnter}
-              onDragEnd={handleDragEnd}
-              onDragOver={handleDragOver}
-            />
-          ))}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {filteredCryptos.map((crypto, index) => {
+            // Solo paso drag events al contenedor, no al CryptoCard
+            return (
+              <div
+                key={crypto.id}
+                draggable
+                onDragStart={() => handleDragStart(index)}
+                onDragEnter={() => handleDragEnter(index)}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                className={`transition-transform ${
+                  index === draggedItemIndex ? 'opacity-50' : 'opacity-100'
+                }`}
+              >
+                <CryptoCard 
+                  crypto={crypto} 
+                  index={index}
+                />
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

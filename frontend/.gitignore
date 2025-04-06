@@ -1,5 +1,15 @@
 node_modules
 
-/.cache
-/build
+.cache
+build
+dist
+data
+public/build
+*.tsbuildinfo
+
 .env
+.env.*
+!.env.example
+
+.DS_Store
+coverage

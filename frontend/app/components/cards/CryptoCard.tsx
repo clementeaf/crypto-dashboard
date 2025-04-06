@@ -1,136 +1,57 @@
-import { useState } from 'react';
+import React from 'react';
 import type { Cryptocurrency } from '~/types/crypto';
 
 interface CryptoCardProps {
   crypto: Cryptocurrency;
   index: number;
-  isDragging: boolean;
-  onDragStart: (index: number) => void;
-  onDragEnter: (index: number) => void;
-  onDragEnd: () => void;
-  onDragOver: (e: React.DragEvent) => void;
 }
 
-export default function CryptoCard({
-  crypto,
-  index,
-  isDragging,
-  onDragStart,
-  onDragEnter,
-  onDragEnd,
-  onDragOver
+export default function CryptoCard({ 
+  crypto, 
+  index
 }: CryptoCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  
-  // Determine color based on price change
-  const priceChangeColor = (crypto.price_change_percentage_24h ?? 0) >= 0
-    ? 'trend-up'
-    : 'trend-down';
-  
-  // Format monetary values
-  const formatCurrency = (value: number, isBtc = false) => {
-    if (isBtc) {
-      // For BTC values, show up to 8 decimals
-      return value.toFixed(value < 0.0001 ? 8 : 6);
-    }
-    
-    // For USD, format with thousands separators and 2 decimals for values greater than 1
-    if (value >= 1) {
-      return new Intl.NumberFormat('en-US', { 
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2 
-      }).format(value);
-    }
-    
-    // For small USD values, show more decimals
-    const decimals = value < 0.0001 ? 8 : (value < 0.01 ? 6 : 4);
-    return value.toFixed(decimals);
-  };
-  
-  // Calculate formatted percentage
-  const formattedPercentage = (crypto.price_change_percentage_24h ?? 0).toFixed(2);
-  
-  // Trend indicator
-  const TrendIndicator = () => (
-    <div className={`flex items-center ${priceChangeColor}`}>
-      <span className="font-medium">
-        {(crypto.price_change_percentage_24h ?? 0) >= 0 ? '↑' : '↓'} {formattedPercentage}%
-      </span>
-    </div>
-  );
-  
-  // Rank badge
-  const RankBadge = () => (
-    <div className="absolute top-3 right-3">
-      <span className="grok-badge grok-badge-secondary">
-        #{(crypto as any).marketCapRank || index + 1}
-      </span>
-    </div>
-  );
-  
+  const {
+    symbol,
+    name,
+    image,
+    current_price,
+  } = crypto;
+
   return (
-    <div
-      className={`grok-card ${isHovered ? 'ring-1 ring-primary' : ''} ${isDragging ? 'opacity-70 scale-[1.02] z-10 shadow-lg' : ''}`}
-      draggable={true}
-      onDragStart={() => onDragStart(index)}
-      onDragEnter={() => onDragEnter(index)}
-      onDragEnd={onDragEnd}
-      onDragOver={onDragOver}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <RankBadge />
-      
-      <div className="grok-card-content">
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden transition-shadow hover:shadow-md">
+      <div className="p-5">
         <div className="flex items-center mb-4">
-          <div className="h-10 w-10 mr-3 relative flex-shrink-0">
-            <img 
-              src={crypto.image} 
-              alt={crypto.name} 
-              className="w-full h-full object-contain rounded-full" 
-            />
+          <div className="mr-3">
+            <img src={image} alt={symbol} className="w-10 h-10 rounded-full" />
           </div>
-          
-          <div className="flex-grow min-w-0">
-            <h3 className="font-bold text-lg truncate">{crypto.name}</h3>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground uppercase">{crypto.symbol}</span>
-              <TrendIndicator />
-            </div>
+          <div>
+            <h3 className="text-lg font-bold">{name}</h3>
+            <span className="text-gray-500 dark:text-gray-400">{symbol}</span>
+          </div>
+          <div className="ml-auto">
+            <span className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300 text-xs font-semibold px-2 py-1 rounded">
+              #{index + 1}
+            </span>
           </div>
         </div>
-        
-        <div className="space-y-4">
-          <div>
-            <div className="text-xs text-muted-foreground mb-1">Price (USD)</div>
-            <div className="text-2xl font-bold">${formatCurrency(crypto.current_price.usd)}</div>
-          </div>
-          
-          <div className="flex justify-between items-end">
+
+        <div className="mb-4">
+          <h4 className="text-2xl font-bold">
+            ${current_price.usd.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </h4>
+        </div>
+
+        <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="grid grid-cols-1 gap-y-3">
             <div>
-              <div className="text-xs text-muted-foreground mb-1">Price (BTC)</div>
-              <div className="text-sm">{formatCurrency(crypto.current_price.btc, true)} BTC</div>
-            </div>
-            
-            <button 
-              className={`btn ${isHovered ? 'btn-primary' : 'btn-secondary'} transition-all duration-300`}
-            >
-              Details
-            </button>
-          </div>
-          
-          <div className="pt-4 border-t border-border grid grid-cols-2 gap-4">
-            <div>
-              <div className="text-xs text-muted-foreground mb-1">Market Cap</div>
-              <div className="font-semibold">
-                ${((crypto.market_cap ?? 0) / 1000000000).toFixed(2)}B
+              <div className="text-sm text-gray-500 dark:text-gray-400">
+                Precio (BTC)
               </div>
-            </div>
-            
-            <div>
-              <div className="text-xs text-muted-foreground mb-1">24h Vol</div>
-              <div className="font-semibold">
-                ${((crypto.total_volume ?? 0) / 1000000000).toFixed(2)}B
+              <div className="font-medium">
+                {current_price.btc.toLocaleString(undefined, { 
+                  minimumFractionDigits: current_price.btc < 0.001 ? 8 : 6, 
+                  maximumFractionDigits: current_price.btc < 0.001 ? 8 : 6
+                })} BTC
               </div>
             </div>
           </div>
