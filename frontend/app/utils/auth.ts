@@ -4,6 +4,8 @@
  * En un entorno de producción, se utilizaría una solución más robusta
  */
 
+import { AuthData, AuthUser } from '~/types/auth.types';
+
 // Clave para almacenar el estado de autenticación en sessionStorage
 const AUTH_KEY = 'crypto_dashboard_auth';
 
@@ -21,15 +23,15 @@ export function login(username: string, password: string): boolean {
   
   if (isValid) {
     // Guardar estado de autenticación
-    const authData = JSON.stringify({
+    const authData: AuthData = {
       isAuthenticated: true,
       username,
       timestamp: new Date().toISOString()
-    });
+    };
     
     try {
       // Intentar guardar en sessionStorage
-      sessionStorage.setItem(AUTH_KEY, authData);
+      sessionStorage.setItem(AUTH_KEY, JSON.stringify(authData));
       console.log('auth.ts: Auth data guardada en sessionStorage');
       
       // Verificar que se haya guardado correctamente
@@ -91,7 +93,7 @@ export function isAuthenticated(): boolean {
  * Obtiene información del usuario autenticado
  * @returns Objeto con datos del usuario o null si no está autenticado
  */
-export function getAuthUser(): { username: string; timestamp: string } | null {
+export function getAuthUser(): AuthUser {
   try {
     if (!isAuthenticated()) {
       console.log('auth.ts: getAuthUser - Usuario no autenticado');
@@ -104,7 +106,7 @@ export function getAuthUser(): { username: string; timestamp: string } | null {
       return null;
     }
     
-    const parsed = JSON.parse(authData);
+    const parsed = JSON.parse(authData) as AuthData;
     console.log('auth.ts: getAuthUser - Datos obtenidos:', parsed);
     return { 
       username: parsed.username,

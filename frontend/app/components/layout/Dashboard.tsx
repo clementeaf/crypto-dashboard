@@ -5,20 +5,7 @@ import ThemeToggle from '~/components/ui/ThemeToggle';
 import type { Cryptocurrency } from '~/types/crypto';
 import { getTimeSinceLastRefresh, setLastRefreshTime, getCardOrder, saveCardOrder } from '~/utils/storage';
 import AutoRefreshControl from '~/components/ui/AutoRefreshControl';
-
-interface DashboardProps {
-  cryptocurrencies: Cryptocurrency[];
-  onRefresh: () => void;
-  apiError?: string | null;
-  title?: string;
-  username?: string;
-  onLogout?: () => void;
-  lastUpdated?: string | null;
-  autoRefresh?: boolean;
-  onToggleAutoRefresh?: () => void;
-  refreshInterval?: number;
-  onChangeRefreshInterval?: (interval: number) => void;
-}
+import { DashboardProps } from '~/types/types';
 
 export default function Dashboard({ 
   cryptocurrencies, 

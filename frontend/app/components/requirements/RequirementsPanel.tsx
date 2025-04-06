@@ -1,15 +1,13 @@
 import { memo } from 'react';
+import { RequirementsPanelProps } from '~/types/types';
 
-type RequirementsPanelProps = {
-  onClose: () => void;
-};
-
-const RequirementsPanel = memo(function RequirementsPanel({ onClose }: RequirementsPanelProps) {
+const RequirementsPanel = memo(function RequirementsPanel({ onClose }: RequirementsPanelProps
+) {
   return (
     <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-700">
       <div className="flex justify-between items-center mb-2">
         <h2 className="text-lg font-semibold text-green-800 dark:text-green-300">Requisitos cumplidos</h2>
-        <button 
+        <button
           onClick={onClose}
           className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
           aria-label="Cerrar panel de requisitos"
@@ -19,7 +17,7 @@ const RequirementsPanel = memo(function RequirementsPanel({ onClose }: Requireme
           </svg>
         </button>
       </div>
-      
+
       <ul className="list-disc pl-5 space-y-2 text-green-800 dark:text-green-300">
         <li>
           <strong>✅ Lista de criptomonedas:</strong> Mostrando hasta 10 criptomonedas populares
@@ -67,7 +65,7 @@ const RequirementsPanel = memo(function RequirementsPanel({ onClose }: Requireme
           </ul>
         </li>
       </ul>
-      
+
       <p className="mt-3 text-sm text-green-800 dark:text-green-300">
         <strong>Nota:</strong> La API de Coinbase tiene límites de solicitudes (rate limits).
         Si experimentas problemas, usa el botón "Limpiar caché" y luego "Actualizar datos".

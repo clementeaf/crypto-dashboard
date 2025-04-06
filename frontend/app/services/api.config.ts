@@ -21,8 +21,8 @@ export const defaultFetchOptions: RequestInit = {
     'Accept': 'application/json',
     'CB-VERSION': '2023-06-15' // Versión de la API de Coinbase
   },
-  // Timeout de 15 segundos
-  signal: AbortSignal.timeout(15000),
+  // Timeout aumentado a 30 segundos para evitar fallos por timeout
+  signal: AbortSignal.timeout(30000),
 };
 
 // Función para construir URLs completas de API

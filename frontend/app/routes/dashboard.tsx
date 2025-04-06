@@ -82,6 +82,13 @@ export default function DashboardRoute() {
   // Usar ThemeContext - Solo la referencia, no usamos en efectos para evitar loops
   const { isDark } = useTheme();
   
+  // Inicializar logger (mover fuera del useRef para mantener orden consistente de hooks)
+  const logger = useLogger({
+    maxLogs: 100,
+    captureConsole: true,
+    persistLogs: false
+  });
+  
   // Estado para controles de UI
   const [showLogs, setShowLogs] = useState(false);
   const [apiTestResult, setApiTestResult] = useState<{
@@ -102,12 +109,16 @@ export default function DashboardRoute() {
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const [lastUpdated, setLastUpdated] = useState<string | null>(null);
   
-  // Inicializar logger con useRef para evitar recrearlo en cada render
-  const loggerRef = useRef(useLogger({
-    maxLogs: 100,
-    captureConsole: true,
-    persistLogs: false
-  }));
+  // Estado para mostrar un mensaje de error personalizado
+  const [apiErrorMessage, setApiErrorMessage] = useState<string | null>(error || null);
+  
+  // Referencia al logger para evitar recrearlo en cada render
+  const loggerRef = useRef(logger);
+  
+  // Actualizar la referencia cuando cambie el logger
+  useEffect(() => {
+    loggerRef.current = logger;
+  }, [logger]);
 
   // Obtener revalidator para actualizar los datos
   const revalidator = useRevalidator();
@@ -194,11 +205,27 @@ export default function DashboardRoute() {
     loggerRef.current.clearLogs();
     // Registrar inicio de actualización
     loggerRef.current.info('Iniciando actualización de datos...', 'refresh');
+    // Reiniciar mensaje de error
+    setApiErrorMessage(null);
     // Actualizar datos
     revalidator.revalidate();
     // Actualizar la hora de última actualización
     setLastUpdated(new Date().toLocaleTimeString());
   }, [revalidator]);
+  
+  // Manejar errores de revalidación
+  useEffect(() => {
+    if (revalidator.state === 'idle' && error) {
+      loggerRef.current.error(`Error en revalidación: ${error}`, 'api');
+      
+      // Mostrar mensaje de error personalizado
+      if (error.includes('timeout') || error.includes('aborted')) {
+        setApiErrorMessage('La conexión con la API está tardando demasiado tiempo. Mostraremos datos de ejemplo mientras tanto.');
+      } else {
+        setApiErrorMessage(error);
+      }
+    }
+  }, [revalidator.state, error]);
   
   // Establecer última actualización al cargar por primera vez
   useEffect(() => {
@@ -242,7 +269,7 @@ export default function DashboardRoute() {
       onToggleAutoRefresh={handleToggleAutoRefresh}
       refreshInterval={refreshInterval}
       onChangeRefreshInterval={handleChangeInterval}
-      apiError={error}
+      apiError={apiErrorMessage}
       cryptocurrencies={cryptocurrencies}
     />
   );

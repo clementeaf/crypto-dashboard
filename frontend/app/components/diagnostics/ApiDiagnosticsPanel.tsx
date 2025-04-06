@@ -1,24 +1,5 @@
 import { memo } from 'react';
-
-// Definición de tipos
-export type ApiTestResultType = {
-  success?: boolean;
-  data?: any;
-  error?: string;
-  statusCode?: number;
-  responseTime?: number;
-  timestamp?: string;
-};
-
-type ApiDiagnosticsPanelProps = {
-  logs: string[];
-  apiTestResult: ApiTestResultType | null;
-  isTestingApi: boolean;
-  isClearingCache: boolean;
-  handleTestApi: () => Promise<void>;
-  handleClearCache: () => void;
-  testApiUrl: string;
-};
+import { ApiDiagnosticsPanelProps } from '~/types/types';
 
 // Componente memoizado para evitar renderizados innecesarios
 const ApiDiagnosticsPanel = memo(function ApiDiagnosticsPanel({

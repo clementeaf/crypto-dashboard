@@ -1,9 +1,4 @@
-import type { Cryptocurrency } from '~/types/crypto';
-
-interface CryptoCardProps {
-  crypto: Cryptocurrency;
-  index: number;
-}
+import { CryptoCardProps } from "~/types/types";
 
 export default function CryptoCard({ 
   crypto, 

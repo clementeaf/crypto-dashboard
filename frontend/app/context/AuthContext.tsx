@@ -1,19 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { login as authLogin, logout as authLogout, isAuthenticated, getAuthUser } from '~/utils/auth';
-
-// Definir tipos
-type AuthUser = {
-  username: string;
-  timestamp: string;
-} | null;
-
-type AuthContextType = {
-  user: AuthUser;
-  isLoggedIn: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  checkAuth: () => boolean;
-};
+import { AuthUser, AuthContextType } from '~/types/auth.types';
 
 // Crear contexto con valor por defecto
 const AuthContext = createContext<AuthContextType | undefined>(undefined);

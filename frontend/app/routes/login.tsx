@@ -5,6 +5,7 @@ import { json } from "@remix-run/node";
 import { useAuth } from "~/context/AuthContext";
 import { useTheme } from "~/root";
 import LoadingButton from "~/components/ui/LoadingButton";
+import { LoginActionData } from "~/types/auth.types";
 
 export const meta: MetaFunction = () => {
   return [
@@ -38,7 +39,7 @@ export default function Login() {
   const navigate = useNavigate();
   const { login, isLoggedIn } = useAuth();
   const { isDark } = useTheme();
-  const actionData = useActionData<{ success: boolean; error?: string; username?: string; password?: string }>();
+  const actionData = useActionData<LoginActionData>();
 
   // Process server action result
   useEffect(() => {

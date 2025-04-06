@@ -35,6 +35,10 @@ const CACHE_TTL = 5 * 60 * 1000;
 // Retraso entre solicitudes para evitar rate limiting
 const API_DELAY = 300; // milisegundos
 
+// Configuración para reintentos de solicitudes
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 segundo entre reintentos
+
 // Función para esperar un tiempo determinado
 const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
@@ -240,42 +244,74 @@ export async function getCryptocurrencies(limit: number = DEFAULT_LIMIT): Promis
 
 /**
  * Obtiene el precio de una criptomoneda específica desde Coinbase
+ * Incluye lógica de reintentos automáticos
  */
 async function getPriceData(symbol: string): Promise<Cryptocurrency> {
-  try {
-    const endpoint = `${API_ROUTES.ticker}/${symbol}-USD/spot`;
-    const url = buildApiUrl(endpoint);
-    console.log(`[DEBUG] Obteniendo precio para ${symbol} desde: ${url}`);
-    
-    const response = await fetch(url, { ...defaultFetchOptions, method: 'GET' });
-    console.log(`[DEBUG] Respuesta para ${symbol}: ${response.status} ${response.statusText}`);
-    
-    const data = await handleApiResponse<any>(response);
-    
-    const price = parseFloat(data.data.amount);
-    const info = CRYPTO_INFO[symbol] || { name: symbol, id: symbol.toLowerCase() };
-    
-    console.log(`[DEBUG] Precio obtenido para ${symbol}: $${price}`);
-    
-    // Creamos una estructura de datos correspondiente a nuestro tipo Cryptocurrency
-    return {
-      id: info.id,
-      symbol: symbol,
-      name: info.name,
-      image: getCryptoIconUrl(symbol),
-      current_price: {
-        usd: price,
-        btc: 0 // Se calculará después con el precio de BTC
-      },
-      price_change_percentage_24h: 0, // Coinbase no proporciona este dato en su API pública
-      market_cap: 0, // Coinbase no proporciona este dato en su API pública
-      total_volume: 0, // Coinbase no proporciona este dato en su API pública
-      circulating_supply: 0 // Coinbase no proporciona este dato en su API pública
-    };
-  } catch (error) {
-    console.error(`[ERROR] Error al obtener precio para ${symbol}:`, error);
-    throw error;
+  let lastError: any = null;
+  
+  // Intentar la solicitud varias veces
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const endpoint = `${API_ROUTES.ticker}/${symbol}-USD/spot`;
+      const url = buildApiUrl(endpoint);
+      console.log(`[DEBUG] Obteniendo precio para ${symbol} desde: ${url} (intento ${attempt}/${MAX_RETRIES})`);
+      
+      // Crear una señal de abort con timeout específico para esta solicitud
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 20000); // 20 segundos de timeout
+      
+      try {
+        const response = await fetch(url, { 
+          ...defaultFetchOptions, 
+          method: 'GET',
+          signal: controller.signal
+        });
+        
+        // Limpiar el timeout
+        clearTimeout(timeoutId);
+        
+        const data = await handleApiResponse<any>(response);
+        
+        // Si llegamos aquí, la solicitud fue exitosa
+        console.log(`[DEBUG] Datos obtenidos correctamente para ${symbol}`);
+        
+        // La API de Coinbase devuelve los datos en formato: { data: { base: "BTC", currency: "USD", amount: "65000.00" } }
+        const price = parseFloat(data.data.amount);
+        
+        // Construir objeto de criptomoneda con la información necesaria
+        return {
+          id: CRYPTO_INFO[symbol]?.id || symbol.toLowerCase(),
+          symbol: symbol,
+          name: CRYPTO_INFO[symbol]?.name || symbol,
+          image: getCryptoIconUrl(symbol),
+          current_price: {
+            usd: price,
+            btc: 0, // Se calculará después en getCryptocurrencies
+          },
+          price_change_percentage_24h: 0, // No disponible en este endpoint
+          market_cap: 0, // No disponible en este endpoint
+          total_volume: 0, // No disponible en este endpoint
+          circulating_supply: 0 // No disponible en este endpoint
+        };
+      } finally {
+        // Asegurarse de limpiar el timeout en caso de error
+        clearTimeout(timeoutId);
+      }
+    } catch (error) {
+      lastError = error;
+      console.error(`[ERROR] Error al obtener precio para ${symbol} (intento ${attempt}/${MAX_RETRIES}):`, error);
+      
+      // Si no es el último intento, esperar antes de reintentar
+      if (attempt < MAX_RETRIES) {
+        console.log(`[RETRY] Esperando ${RETRY_DELAY}ms antes de reintentar...`);
+        await sleep(RETRY_DELAY);
+      }
+    }
   }
+  
+  // Si llegamos aquí, todos los intentos fallaron
+  console.error(`[ERROR] Fallaron todos los intentos para obtener ${symbol}`);
+  throw lastError;
 }
 
 /**

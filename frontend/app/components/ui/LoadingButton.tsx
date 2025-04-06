@@ -1,20 +1,5 @@
-import { memo, ReactNode } from 'react';
-
-type ButtonVariant = 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info';
-
-type LoadingButtonProps = {
-  children: ReactNode;
-  onClick?: () => void;
-  isLoading?: boolean;
-  disabled?: boolean;
-  variant?: ButtonVariant;
-  size?: 'sm' | 'md' | 'lg';
-  fullWidth?: boolean;
-  type?: 'button' | 'submit' | 'reset';
-  className?: string;
-  loadingText?: string;
-  icon?: ReactNode;
-};
+import { memo } from 'react';
+import { ButtonVariant, LoadingButtonProps } from '~/types/types';
 
 const variantStyles: Record<ButtonVariant, string> = {
   primary: 'bg-blue-500 hover:bg-blue-600 text-white',
