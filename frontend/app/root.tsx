@@ -1,4 +1,3 @@
-import { json } from "@remix-run/node";
 import {
   Links,
   Meta,
@@ -12,63 +11,63 @@ import { LinksFunction, MetaFunction } from "@remix-run/node";
 import { createContext, useContext, useState, useEffect } from "react";
 import { AuthProvider } from "~/context/AuthContext";
 
-// Importar CSS como side effect
+// Import CSS as side effect
 import "./tailwind.css";
 
-// Tema simple - solo necesitamos true/false para dark mode
+// Simple theme - we only need true/false for dark mode
 type ThemeContextType = {
   isDark: boolean;
   toggleTheme: () => void;
 };
 
-// Crear contexto simple de tema
+// Create simple theme context
 export const ThemeContext = createContext<ThemeContextType>({
   isDark: true,
   toggleTheme: () => {},
 });
 
-// Hook simple para usar el tema
+// Simple hook to use the theme
 export function useTheme() {
   return useContext(ThemeContext);
 }
 
-// Proveedor simple de tema
+// Simple theme provider
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [isDark, setIsDark] = useState(true);
   
-  // Toggle simple entre claro/oscuro
+  // Simple toggle between light/dark
   const toggleTheme = () => {
     const newIsDark = !isDark;
     setIsDark(newIsDark);
     
-    // Aplicar cambio directamente al HTML
+    // Apply change directly to HTML
     if (newIsDark) {
       document.documentElement.classList.add('dark');
     } else {
       document.documentElement.classList.remove('dark');
     }
     
-    // Guardar en localStorage
+    // Save to localStorage
     localStorage.setItem('isDark', String(newIsDark));
   };
   
-  // Cargar preferencia al inicio
+  // Load preference at startup
   useEffect(() => {
     const savedIsDark = localStorage.getItem('isDark');
     
-    // Si hay una preferencia guardada, usarla
+    // If there's a saved preference, use it
     if (savedIsDark !== null) {
       const parsedIsDark = savedIsDark === 'true';
       setIsDark(parsedIsDark);
       
-      // Aplicar tema guardado
+      // Apply saved theme
       if (parsedIsDark) {
         document.documentElement.classList.add('dark');
       } else {
         document.documentElement.classList.remove('dark');
       }
     } else {
-      // Por defecto, usar tema oscuro
+      // By default, use dark theme
       document.documentElement.classList.add('dark');
     }
   }, []);
@@ -80,7 +79,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Usar una URL relativa al archivo CSS
+// Use a relative URL to the CSS file
 export const links: LinksFunction = () => [
   { rel: "icon", href: "/favicon.ico" },
 ];
@@ -90,38 +89,38 @@ export const meta: MetaFunction = () => {
     { title: "Crypto Dashboard" },
     {
       name: "description",
-      content: "Dashboard en tiempo real para visualizar información de criptomonedas",
+      content: "Real-time dashboard for cryptocurrency information",
     },
   ];
 };
 
-// Función para determinar si debemos usar el tema oscuro por defecto
-// Esto asegura que el servidor y el cliente tengan la misma clase inicial
+// Function to determine if we should use dark mode by default
+// This ensures that the server and client have the same initial class
 function getInitialDarkMode(): boolean {
-  // En el servidor, siempre asumimos dark mode por defecto
+  // On the server, we always assume dark mode by default
   if (typeof window === 'undefined') return true;
   
-  // En el cliente, verificamos localStorage
+  // On the client, we check localStorage
   try {
     const storedValue = localStorage.getItem('isDark');
     return storedValue === null || storedValue === 'true';
   } catch (e) {
-    return true; // Por defecto usamos dark mode
+    return true; // By default we use dark mode
   }
 }
 
-// Usamos una variable para determinar si añadimos la clase 'dark' por defecto
+// We use a variable to determine if we add the 'dark' class by default
 const initialIsDark = getInitialDarkMode();
 
 export default function App() {
   return (
-    <html lang="es" className={`h-full${initialIsDark ? ' dark' : ''}`}>
+    <html lang="en" className={`h-full${initialIsDark ? ' dark' : ''}`}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <Meta />
         <Links />
-        {/* Script para prevenir parpadeo */}
+        {/* Script to prevent flicker */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -152,10 +151,10 @@ export default function App() {
   );
 }
 
-// Error Boundary para manejo de errores a nivel de aplicación
+// Error Boundary for application-level error handling
 export function ErrorBoundary() {
   const error = useRouteError();
-  let message = "Ha ocurrido un error inesperado. Por favor, intenta de nuevo más tarde.";
+  let message = "An unexpected error occurred. Please try again later.";
   let title = "Error";
   let status = 500;
 
@@ -168,7 +167,7 @@ export function ErrorBoundary() {
   }
 
   return (
-    <html lang="es" className="h-full dark">
+    <html lang="en" className="h-full dark">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -186,7 +185,7 @@ export function ErrorBoundary() {
                 href="/"
                 className="inline-block bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-md transition-colors"
               >
-                Volver al inicio
+                Back to Homepage
               </a>
             </div>
           </div>

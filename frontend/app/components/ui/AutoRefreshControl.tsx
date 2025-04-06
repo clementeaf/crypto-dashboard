@@ -29,7 +29,7 @@ const AutoRefreshControl = memo(function AutoRefreshControl({
             checked={autoRefresh}
             onChange={onToggleAutoRefresh}
             disabled={disabled}
-            aria-label="Activar actualización automática"
+            aria-label="Enable automatic updates"
           />
           <div 
             className={`block w-10 h-6 rounded-full ${
@@ -54,7 +54,7 @@ const AutoRefreshControl = memo(function AutoRefreshControl({
         value={refreshInterval}
         onChange={handleIntervalChange}
         disabled={disabled || !autoRefresh}
-        aria-label="Intervalo de actualización automática"
+        aria-label="Auto-refresh interval"
       >
         <option value="30">30s</option>
         <option value="60">1m</option>

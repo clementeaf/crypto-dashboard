@@ -12,7 +12,7 @@ export default function SearchFilter({
   searchTerm, 
   setSearchTerm, 
   isLoading = false,
-  placeholder = "Buscar criptomoneda por nombre o símbolo..."
+  placeholder = "Search cryptocurrency by name or symbol..."
 }: SearchFilterProps) {
   const { isDark } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
@@ -69,8 +69,8 @@ export default function SearchFilter({
             hover:text-gray-700 dark:hover:text-gray-300 
             transition-colors"
           onClick={() => setSearchTerm('')}
-          aria-label="Limpiar búsqueda"
-          title="Limpiar búsqueda"
+          aria-label="Clear search"
+          title="Clear search"
         >
           <svg 
             className="w-5 h-5" 

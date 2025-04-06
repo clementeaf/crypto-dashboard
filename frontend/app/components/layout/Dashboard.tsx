@@ -269,14 +269,14 @@ export default function Dashboard({
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      <span>Actualizando...</span>
+                      <span>Updating...</span>
                     </>
                   ) : (
                     <>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
-                      <span>Actualizar</span>
+                      <span>Update</span>
                     </>
                   )}
                 </button>
@@ -286,7 +286,7 @@ export default function Dashboard({
                     onClick={onLogout}
                     className="px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-lg transition-all shadow-sm"
                   >
-                    Cerrar sesión
+                    Logout
                   </button>
                 )}
               </div>
@@ -314,14 +314,14 @@ export default function Dashboard({
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      <span>Actualizando...</span>
+                      <span>Updating...</span>
                     </>
                   ) : (
                     <>
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                       </svg>
-                      <span>Actualizar</span>
+                      <span>Update</span>
                     </>
                   )}
                 </button>
@@ -331,7 +331,7 @@ export default function Dashboard({
                     onClick={onLogout}
                     className="flex-1 px-4 py-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-900 dark:text-white font-medium rounded-lg transition-all shadow-sm text-center"
                   >
-                    Cerrar sesión
+                    Logout
                   </button>
                 )}
               </div>
@@ -341,13 +341,13 @@ export default function Dashboard({
       </nav>
       
       <main className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
-        {/* Panel de bienvenida con stats generales */}
+        {/* Welcome panel with general stats */}
         <div className="mb-6 sm:mb-8 bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden">
           <div className="p-4 sm:p-6">
             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 md:gap-6">
               <div>
                 <div className="flex items-center mb-2">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">Bienvenido al Dashboard</h2>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-gray-100">Welcome to Dashboard</h2>
                   <div className="ml-3 px-2 py-1 rounded-full bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 flex items-center">
                     <span className="text-xs text-gray-600 dark:text-gray-300">
                       {username}
@@ -363,10 +363,10 @@ export default function Dashboard({
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
-                        <span>Actualizando...</span>
+                        <span>Updating...</span>
                       </div>
                     ) : lastUpdated ? (
-                      <span>Actualizado: {lastUpdated}</span>
+                      <span>Updated: {lastUpdated}</span>
                     ) : null}
                   </div>
                   
@@ -384,28 +384,28 @@ export default function Dashboard({
                 </div>
                 
                 <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                  Visualiza y analiza las principales criptomonedas en tiempo real
+                  View and analyze the main cryptocurrencies in real time
                 </p>
                 
-                {/* Stats flexibles */}
+                {/* Flexible stats */}
                 <div className="mt-4 sm:mt-6 grid grid-cols-2 gap-2 sm:gap-4">
                   <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700/50">
-                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Monedas</div>
+                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Total Coins</div>
                     <div className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white">{cryptocurrencies.length}</div>
                   </div>
                   
                   <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700/50">
-                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Monitoreadas</div>
+                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Monitored</div>
                     <div className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white">{filteredCryptos.length}</div>
                   </div>
                   
                   <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700/50">
                     <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Auto-refresh</div>
-                    <div className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white">{autoRefresh ? 'Activado' : 'Desactivado'}</div>
+                    <div className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white">{autoRefresh ? 'Enabled' : 'Disabled'}</div>
                   </div>
                   
                   <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-3 sm:p-4 border border-gray-200 dark:border-gray-700/50">
-                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Intervalo</div>
+                    <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Interval</div>
                     <div className="text-lg sm:text-2xl font-bold text-gray-800 dark:text-white">{refreshInterval}s</div>
                   </div>
                 </div>
@@ -417,7 +417,7 @@ export default function Dashboard({
                     searchTerm={searchTerm}
                     setSearchTerm={setSearchTerm}
                     isLoading={isLoading}
-                    placeholder="Buscar criptomoneda..."
+                    placeholder="Search cryptocurrency..."
                   />
                 </div>
               </div>
@@ -425,7 +425,7 @@ export default function Dashboard({
           </div>
         </div>
         
-        {/* Mensajes de error */}
+        {/* Error messages */}
         {apiError && (
           <div className="mb-4 sm:mb-6 bg-red-50 dark:bg-red-900/20 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-red-200 dark:border-red-500/30">
             <div className="flex items-start">
@@ -437,21 +437,21 @@ export default function Dashboard({
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800 dark:text-red-300">{apiError}</h3>
                 <div className="mt-1 text-xs text-red-700 dark:text-red-300/80">
-                  Los datos mostrados pueden no ser precisos. Intente actualizar en unos minutos.
+                  The data shown may not be accurate. Try refreshing in a few minutes.
                 </div>
               </div>
             </div>
           </div>
         )}
         
-        {/* Grid de criptomonedas con efecto de cristal */}
+        {/* Cryptocurrencies grid with glass effect */}
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white">Criptomonedas</h2>
+          <h2 className="text-lg sm:text-xl font-bold text-gray-800 dark:text-white">Cryptocurrencies</h2>
           
           <div className="flex items-center gap-2">
             {filteredCryptos.length === 0 && searchTerm.trim() !== '' && (
               <span className="text-xs sm:text-sm text-yellow-600 dark:text-yellow-400">
-                No se encontraron resultados
+                No results found
               </span>
             )}
           </div>
@@ -532,7 +532,7 @@ export default function Dashboard({
                       <div className="grid grid-cols-1 gap-y-2 sm:gap-y-3">
                         <div>
                           <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
-                            Precio (BTC)
+                            Price (BTC)
                           </div>
                           <div className="text-sm sm:font-medium text-gray-700 dark:text-gray-300">
                             {crypto.current_price.btc.toLocaleString(undefined, { 
@@ -551,12 +551,12 @@ export default function Dashboard({
         )}
       </main>
       
-      {/* Footer con efectos de vidrio */}
+      {/* Footer with glass effects */}
       <footer className="bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 mt-6 sm:mt-12">
         <div className="max-w-7xl mx-auto px-4 py-4 sm:py-6">
           <div className="text-center text-gray-600 dark:text-gray-400 text-xs sm:text-sm">
-            <p>Crypto Dashboard — Arrastra las tarjetas para reorganizarlas</p>
-            <p className="mt-1">Última actualización: {lastUpdated}</p>
+            <p>Crypto Dashboard — Drag the cards to reorganize them</p>
+            <p className="mt-1">Last update: {lastUpdated}</p>
           </div>
         </div>
       </footer>

@@ -7,7 +7,7 @@ export default function ThemeToggle() {
     <button 
       onClick={toggleTheme}
       className="flex items-center justify-center px-3 py-1.5 sm:px-4 sm:py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-      aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
       {isDark ? (
         <>
@@ -23,7 +23,7 @@ export default function ThemeToggle() {
               clipRule="evenodd"
             />
           </svg>
-          <span className="text-xs sm:text-sm text-gray-600 dark:text-white">Claro</span>
+          <span className="text-xs sm:text-sm text-gray-600 dark:text-white">Light</span>
         </>
       ) : (
         <>
@@ -35,7 +35,7 @@ export default function ThemeToggle() {
           >
             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
           </svg>
-          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Oscuro</span>
+          <span className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">Dark</span>
         </>
       )}
     </button>
