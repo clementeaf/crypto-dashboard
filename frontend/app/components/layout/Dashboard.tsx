@@ -441,7 +441,6 @@ export default function Dashboard({
                     setSearchTerm={setSearchTerm}
                     isLoading={isLoading}
                     placeholder="Buscar criptomoneda..."
-                    darkMode={true}
                   />
                 </div>
               </div>
