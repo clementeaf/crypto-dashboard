@@ -4,6 +4,15 @@
 
 Crypto Dashboard is a web application built with Remix and React that displays real-time cryptocurrency information using the Coinbase public API. The application allows users to view, sort, and filter cryptocurrencies in a responsive card layout. It features drag-and-drop reordering, filtering capabilities, real-time data updates, and a clean, modern UI with dark/light mode support.
 
+## Live Demo
+
+A live demo of the application is deployed and available at:
+[https://crypto-dashboard-chi-sandy.vercel.app/](https://crypto-dashboard-chi-sandy.vercel.app/)
+
+**Login credentials:**
+- Username: `admin`
+- Password: `admin`
+
 ## Key Features
 
 ### Core Requirements
@@ -57,7 +66,7 @@ Crypto Dashboard is a web application built with Remix and React that displays r
    npm run dev
    ```
 
-5. Open your browser at [http://localhost:3000](http://localhost:3000)
+5. Open your browser at [ http://localhost:5173/]( http://localhost:5173/)
 
 ## Usage
 
